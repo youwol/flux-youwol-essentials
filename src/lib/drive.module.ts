@@ -1,5 +1,5 @@
 
-import { Flux, BuilderView, ModuleFlow, Pipe, Schema, Property, Context, ModuleError } from "@youwol/flux-core"
+import { Flux, BuilderView, ModuleFlux, Pipe, Schema, Property, Context, ModuleError } from "@youwol/flux-core"
 import { AssetsGatewayClient } from "./assets-gateway-client";
 import { Drive } from "./drive";
 import { pack } from './main';
@@ -107,7 +107,7 @@ export namespace ModuleYouwolDrive {
         namespace: ModuleYouwolDrive,
         icon: svgIcon
     })
-    export class Module extends ModuleFlow {
+    export class Module extends ModuleFlux {
         
         /**
          * Output pipe of the module: convey a YouWol's drive
