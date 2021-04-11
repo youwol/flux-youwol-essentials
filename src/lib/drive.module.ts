@@ -49,16 +49,6 @@ export namespace ModuleYouwolDrive {
 
 
         /**
-         * Path of the folder exposed (wrtten as folder1/folder2/...; referenced from the root of the drive).
-         * Live empty to expose the drive's root.
-         */
-         @Property({ 
-            description: "Path of the folder exposed (wrtten as folder1/folder2/...; referenced from the root of the drive). "+
-            "Live empty to expose the drive's root."
-        })
-        readonly exposedFolderPath: string
-
-        /**
          * The displayed name of the drive.
          */
          @Property({ 
@@ -67,15 +57,13 @@ export namespace ModuleYouwolDrive {
         readonly driveName: string
 
 
-        constructor({ ywGroup, ywDrive, exposedFolderPath, driveName }:
+        constructor({ ywGroup, ywDrive, driveName }:
             {   ywGroup?: string,
                 ywDrive?: string,
-                exposedFolderPath?: string, 
                 driveName? : string
             } = {}) {
                 this.ywGroup =  ywGroup != undefined ? ywGroup : "youwol-users"
                 this.ywDrive =  ywDrive != undefined ? ywDrive : "assets"
-                this.exposedFolderPath = exposedFolderPath != undefined ? exposedFolderPath : ""
                 this.driveName = driveName != undefined ? driveName : 'YouWol drive'
         }
     }
@@ -139,14 +127,13 @@ export namespace ModuleYouwolDrive {
 
             this.drive$ = this.addOutput({id:"drive"} )
             let configuration = this.getConfiguration<PersistentData>()
-            let folderPath = configuration.exposedFolderPath
             let groupName = configuration.ywGroup
             if(groupName[0] != '/' )
                 groupName = '/' + groupName
 
             let driveName = configuration.ywDrive
             context.info(
-                `YouWol's group: ${groupName}; drive name:${driveName}; folder path:${folderPath}`,
+                `YouWol's group: ${groupName}; drive name: ${driveName}`,
                 {configuration}
             )
 
