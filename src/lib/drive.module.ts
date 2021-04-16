@@ -100,7 +100,7 @@ export namespace ModuleYouwolDrive {
         displayName: "YouWol drive",
         description: "Drive to access your YouWol's workspace data",
         resources: {
-            'technical doc': `${pack.urlCDN}/dist/docs/modules/moduleyouwoldrive.html`,
+            'technical doc': `${pack.urlCDN}/dist/docs/modules/lib_drive_module.moduleyouwoldrive.html`,
         }
     })
     @BuilderView({
