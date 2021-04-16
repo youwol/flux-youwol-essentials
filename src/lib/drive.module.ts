@@ -24,9 +24,7 @@ export namespace ModuleYouwolDrive {
     The configuration of the editor module allows to tune the rendering of the displayed content.
     */
     @Schema({
-        pack: pack,
-        description: "Persistent Data of YouWol's drive module",
-        namespace: ModuleYouwolDrive,
+        pack: pack
     })
     export class PersistentData {
 
@@ -126,7 +124,7 @@ export namespace ModuleYouwolDrive {
             })
 
             this.drive$ = this.addOutput({id:"drive"} )
-            let configuration = this.getConfiguration<PersistentData>()
+            let configuration = this.getPersistentData<PersistentData>()
             let groupName = configuration.ywGroup
             if(groupName[0] != '/' )
                 groupName = '/' + groupName
