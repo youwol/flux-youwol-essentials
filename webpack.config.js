@@ -32,7 +32,7 @@ module.exports = {
             root:['rxjs','operators']
         },
         '@youwol/flux-core': "@youwol/flux-core",
-        '@youwol/cdn': '@youwol/cdn',
+        '@youwol/cdn-client': '@youwol/cdn-client',
         '@youwol/flux-files': "@youwol/flux-files",
     }],
     module: {
