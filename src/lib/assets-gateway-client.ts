@@ -27,7 +27,7 @@ export interface ItemResponse {
     groupId: string
     kind: string
     folderId: string
-
+    borrowed: boolean
 }
 
 export const UploadStep = {
