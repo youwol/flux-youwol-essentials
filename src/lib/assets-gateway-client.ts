@@ -92,6 +92,26 @@ export class AssetsGatewayClient {
         return new Headers()
     }
 
+    static getGroups(events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
+        ): Observable<GroupResponse>{
+        
+        let follower = new Interfaces.RequestFollower({
+            targetId: `getGroups`,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.QUERY
+        })
+        
+        let requestGroups = new Request(
+            `${AssetsGatewayClient.basePath}/groups`,
+            { method: 'GET', headers: AssetsGatewayClient.getHeaders() }
+        );
+        return of({}).pipe(
+            tap( () => follower.start(1) ), 
+            mergeMap( () => createObservableFromFetch(requestGroups)),
+            tap(() => follower.end()) 
+        ) as any
+    }
+
     static getDrive(
         groupName: string,
         driveName: string,
