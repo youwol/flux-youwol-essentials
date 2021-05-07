@@ -1,8 +1,15 @@
 import { Interfaces } from "@youwol/flux-files"
 import { Observable, Subject } from "rxjs"
 import { map, tap } from "rxjs/operators"
-import { AssetsGatewayClient, DeletedEntityResponse } from "./assets-gateway-client"
+import { AssetsGatewayClient, DeletedEntityResponse, ItemResponse } from "./assets-gateway-client"
 
+
+export class File extends Interfaces.File {
+
+    constructor(public readonly drive: Drive, public readonly metadata: ItemResponse){
+        super(metadata.treeId, metadata.name, metadata.folderId, drive, "")
+    }
+}
 export class Drive extends Interfaces.Drive {
 
     rawIds: { [key: string]: string } = {} // known treeId (itemId) to rawId
@@ -100,7 +107,7 @@ export class Drive extends Interfaces.Drive {
             tap(({ items, folders }) => items.forEach(item => this.rawIds[item.treeId] = item.rawId)),
             map(({ items, folders }) => {
                 return {
-                    files: items.map(item => new Interfaces.File(item.treeId, item.name, item.folderId, this, "")),
+                    files: items.map(item => new File(this, item) ),
                     folders: folders.map(item => new Interfaces.Folder(item.folderId, item.name, item.parentFolderId, this)),
                     endIterator: undefined
                 }
