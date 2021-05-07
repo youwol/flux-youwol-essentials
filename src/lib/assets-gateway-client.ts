@@ -3,6 +3,11 @@ import { Observable, Subject } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import { Interfaces } from '@youwol/flux-files'
 
+export interface GroupResponse {
+
+    groups: Array<{id: string,path: string}>
+}
+
 export interface DriveResponse {
 
     driveId: string
