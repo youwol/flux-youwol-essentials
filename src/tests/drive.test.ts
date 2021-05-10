@@ -1,11 +1,13 @@
 import { Interfaces } from '@youwol/flux-files'
+import { AssetsGatewayClient } from '../lib/assets-gateway-client'
 import { Drive } from '../lib/drive'
 import './mock-requests'
 
+let assetsGtwClient = new AssetsGatewayClient()
 
 test('get drive', (done) => {
     
-    let drive = new Drive('test_drive', 'Test drive')
+    let drive = new Drive('test_drive', 'Test drive', assetsGtwClient)
 
     let notifications = []
     drive.events$.subscribe( (event:Interfaces.EventIO) => {
@@ -22,7 +24,7 @@ test('get drive', (done) => {
 
 test('delete drive', (done) => {
     
-    let drive = new Drive('test_drive', 'Test drive')
+    let drive = new Drive('test_drive', 'Test drive', assetsGtwClient)
 
     let notifications = []
     drive.events$.subscribe( (event:Interfaces.EventIO) => {
@@ -41,7 +43,7 @@ test('delete drive', (done) => {
 
 test('rename file', (done) => {
     
-    let drive = new Drive('test_drive', 'Test drive')
+    let drive = new Drive('test_drive', 'Test drive', assetsGtwClient)
     let item = new Interfaces.File("test_item", "test_item_name","folder", drive, "")
 
     let notifications = []
@@ -62,7 +64,7 @@ test('rename file', (done) => {
 
 test('rename folder', (done) => {
     
-    let drive = new Drive('test_drive', 'Test drive')
+    let drive = new Drive('test_drive', 'Test drive', assetsGtwClient)
     let item = new Interfaces.Folder("test_folder", "test_folder_name","folder", drive)
 
     let notifications = []
@@ -83,7 +85,7 @@ test('rename folder', (done) => {
 
 test('rename drive', (done) => {
     
-    let drive = new Drive('test_drive', 'Test drive')
+    let drive = new Drive('test_drive', 'Test drive', assetsGtwClient)
 
     let notifications = []
     drive.events$.subscribe( (event:Interfaces.EventIO) => {
@@ -104,7 +106,7 @@ test('rename drive', (done) => {
 
 test('get file', (done) => {
     
-    let drive = new Drive('test_drive', 'Test drive')
+    let drive = new Drive('test_drive', 'Test drive', assetsGtwClient)
 
     let notifications = []
     drive.events$.subscribe( (event:Interfaces.EventIO) => {
@@ -124,7 +126,7 @@ test('get file', (done) => {
 
 test('list items', (done) => {
     
-    let drive = new Drive('test_drive', 'Test drive')
+    let drive = new Drive('test_drive', 'Test drive', assetsGtwClient)
 
     let notifications = []
     drive.events$.subscribe( (event:Interfaces.EventIO) => {
@@ -145,7 +147,7 @@ test('list items', (done) => {
 
 test('delete file', (done) => {
     
-    let drive = new Drive('test_drive', 'Test drive')
+    let drive = new Drive('test_drive', 'Test drive', assetsGtwClient)
 
     let notifications = []
     drive.events$.subscribe( (event:Interfaces.EventIO) => {

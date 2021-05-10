@@ -1,7 +1,7 @@
 import { Interfaces } from "@youwol/flux-files"
 import { Observable, Subject } from "rxjs"
 import { map, tap } from "rxjs/operators"
-import { AssetsGatewayClient, DeletedEntityResponse, ItemResponse } from "./assets-gateway-client"
+import { DeletedEntityResponse, ItemResponse, AssetsGatewayClient } from "./assets-gateway-client"
 
 
 export class File extends Interfaces.File {
@@ -13,11 +13,16 @@ export class File extends Interfaces.File {
 export class Drive extends Interfaces.Drive {
 
     rawIds: { [key: string]: string } = {} // known treeId (itemId) to rawId
+    public readonly assetsGtwClient: AssetsGatewayClient
 
-    constructor(id: string, name: string, useCache?: boolean
+    constructor(
+        id: string,
+        name: string, 
+        assetsGtwClient: AssetsGatewayClient,
+        useCache?: boolean
     ) {
         super(id, name, useCache)
-
+        this.assetsGtwClient = assetsGtwClient
     }
 
     createFile(
@@ -27,7 +32,7 @@ export class Drive extends Interfaces.Drive {
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<Interfaces.File> {
 
-        return AssetsGatewayClient.postFile( folderId, name, content, events$ || this.events$).pipe(
+        return this.assetsGtwClient.postFile( folderId, name, content, events$ || this.events$).pipe(
             map(resp => new Interfaces.File(resp.itemId, resp.name, folderId, this, ""))
         )
     }
@@ -38,7 +43,7 @@ export class Drive extends Interfaces.Drive {
         events$: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>> = undefined
     ): Observable<Interfaces.Folder> {
 
-        return AssetsGatewayClient.postFolder({ name, parentFolderId }, events$ || this.events$).pipe(
+        return this.assetsGtwClient.postFolder({ name, parentFolderId }, events$ || this.events$).pipe(
             map(resp => new Interfaces.Folder(resp.folderId, resp.name, resp.parentFolderId, this))
         )
     }
@@ -48,7 +53,7 @@ export class Drive extends Interfaces.Drive {
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
         ): Observable<DeletedEntityResponse> {
 
-        return AssetsGatewayClient.deleteFolder(folderId, events$ || this.events$)
+        return this.assetsGtwClient.deleteFolder(folderId, events$ || this.events$)
     }
 
     renameItem(
@@ -58,18 +63,18 @@ export class Drive extends Interfaces.Drive {
     ): Observable<Interfaces.File | Interfaces.Folder | Interfaces.Drive> {
 
         if (item instanceof Interfaces.File)
-            return AssetsGatewayClient.renameItem(item.id, newName, events$ || this.events$).pipe(
+            return this.assetsGtwClient.renameItem(item.id, newName, events$ || this.events$).pipe(
                 map(resp => new Interfaces.File(item.id, newName, item.parentFolderId, this, item.contentType))
             )
 
         if (item instanceof Interfaces.Folder)
-            return AssetsGatewayClient.renameFolder(item.id, newName, events$ || this.events$).pipe(
+            return this.assetsGtwClient.renameFolder(item.id, newName, events$ || this.events$).pipe(
                 map(resp => new Interfaces.Folder(item.id, newName, item.parentFolderId, this))
             )
 
         if (item instanceof Interfaces.Drive)
-            return AssetsGatewayClient.renameDrive(this.id, newName, events$ || this.events$).pipe(
-                map(resp => new Drive(item.id, newName))
+            return this.assetsGtwClient.renameDrive(this.id, newName, events$ || this.events$).pipe(
+                map(resp => new Drive(item.id, newName, this.assetsGtwClient, this.useCache))
             )
     }
 
@@ -80,7 +85,7 @@ export class Drive extends Interfaces.Drive {
 
         if (!this.rawIds[itemId])
             throw Error(`Drive's cache do not contains rawId for ${itemId}`)
-        return AssetsGatewayClient.getContent(this.rawIds[itemId], events$ || this.events$, this.useCache)
+        return this.assetsGtwClient.getContent(this.rawIds[itemId], events$ || this.events$, this.useCache)
     }
 
     getFile(
@@ -88,7 +93,7 @@ export class Drive extends Interfaces.Drive {
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<Interfaces.File> {
 
-        return AssetsGatewayClient.getItem(itemId, events$ || this.events$).pipe(
+        return this.assetsGtwClient.getItem(itemId, events$ || this.events$).pipe(
             tap((resp) => this.rawIds[itemId] = resp.rawId),
             map((resp) => {
                 return new Interfaces.File(itemId, resp.name, resp.folderId, this, "")
@@ -103,7 +108,7 @@ export class Drive extends Interfaces.Drive {
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<{ folders: Array<Interfaces.Folder>, files: Array<Interfaces.File>, endIterator: string | undefined }> {
 
-        return AssetsGatewayClient.getItems(folderId, events$ || this.events$).pipe(
+        return this.assetsGtwClient.getItems(folderId, events$ || this.events$).pipe(
             tap(({ items, folders }) => items.forEach(item => this.rawIds[item.treeId] = item.rawId)),
             map(({ items, folders }) => {
                 return {
@@ -120,7 +125,7 @@ export class Drive extends Interfaces.Drive {
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<DeletedEntityResponse> {
         
-        return AssetsGatewayClient.deleteItem(this.id, fileId, events$ || this.events$)
+        return this.assetsGtwClient.deleteItem(this.id, fileId, events$ || this.events$)
     }
 
     updateContent(
@@ -129,7 +134,7 @@ export class Drive extends Interfaces.Drive {
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<{ itemId: string, name: string, folderId: string }> {
 
-        return AssetsGatewayClient.updateFile(this.id, fileId, content, events$ || this.events$)
+        return this.assetsGtwClient.updateFile(this.id, fileId, content, events$ || this.events$)
     }
 
     getPermissions() {

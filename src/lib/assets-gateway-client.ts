@@ -1,17 +1,32 @@
 import { createObservableFromFetch } from '@youwol/flux-core';
-import { Observable, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import { Interfaces } from '@youwol/flux-files'
 
+
 export interface GroupResponse {
 
-    groups: Array<{id: string,path: string}>
+    id: string
+    path: string
+}
+
+export interface GroupsResponse {
+
+    groups: Array<GroupResponse>
 }
 
 export interface DriveResponse {
 
     driveId: string
     name: string
+}
+
+export interface DrivesResponse {
+
+    drives: Array<{
+        driveId: string
+        name: string 
+    }>
 }
 
 export interface FolderResponse {
@@ -88,17 +103,29 @@ export class DeletedEntityResponse {
 
 export class AssetsGatewayClient {
 
-    static basePath = "/api/assets-gateway"
+    basePath = "/api/assets-gateway"
+    headers = {}
 
+    constructor({
+        basePath,
+        headers
+    }:
+        {
+            basePath?: string,
+            headers?: {[key:string]: string}
+        } = {}) { 
 
-    constructor() { }
+            this.basePath = basePath || "/api/assets-gateway"
+            this.headers = headers || {}
 
-    static getHeaders() {
-        return new Headers()
+        }
+
+    getHeaders() {
+        return new Headers(this.headers)
     }
 
-    static getGroups(events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
-        ): Observable<GroupResponse>{
+    getGroups(events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
+        ): Observable<GroupsResponse>{
         
         let follower = new Interfaces.RequestFollower({
             targetId: `getGroups`,
@@ -107,8 +134,8 @@ export class AssetsGatewayClient {
         })
         
         let requestGroups = new Request(
-            `${AssetsGatewayClient.basePath}/groups`,
-            { method: 'GET', headers: AssetsGatewayClient.getHeaders() }
+            `${this.basePath}/groups`,
+            { method: 'GET', headers: this.getHeaders() }
         );
         return of({}).pipe(
             tap( () => follower.start(1) ), 
@@ -117,15 +144,39 @@ export class AssetsGatewayClient {
         ) as any
     }
 
-    static getDrive(
+    getDrives(
+        groupId: string,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
+    ): Observable<DrivesResponse> {
+
+        let requestGroups = new Request(
+            `${this.basePath}/tree/groups/${groupId}/drives`,
+            { method: 'GET', headers: this.getHeaders() }
+        );
+
+        let follower = new Interfaces.RequestFollower({
+            targetId: `${groupId}`,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.QUERY
+        })
+
+        return of({}).pipe(
+            tap( () => follower.start(1) ), 
+            mergeMap( () =>createObservableFromFetch(requestGroups)),
+            tap(() => follower.end())
+        ) as  Observable<DrivesResponse> 
+    }
+
+
+    getDrive(
         groupName: string,
         driveName: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<DriveResponse> {
 
         let requestGroups = new Request(
-            `${AssetsGatewayClient.basePath}/groups`,
-            { method: 'GET', headers: AssetsGatewayClient.getHeaders() }
+            `${this.basePath}/groups`,
+            { method: 'GET', headers: this.getHeaders() }
         );
 
         let follower = new Interfaces.RequestFollower({
@@ -133,9 +184,10 @@ export class AssetsGatewayClient {
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.DOWNLOAD
         })
-        follower.start(1)
 
-        return createObservableFromFetch(requestGroups).pipe(
+        return of({}).pipe(
+            tap( () => follower.start(1) ), 
+            mergeMap( () =>createObservableFromFetch(requestGroups)),
             map((resp: any) => {
                 return resp.groups.find(g => g.path == groupName)
             }),
@@ -145,8 +197,8 @@ export class AssetsGatewayClient {
             }),
             mergeMap((group: any) => {
                 let req = new Request(
-                    `${AssetsGatewayClient.basePath}/tree/groups/${group.id}/drives`, 
-                    { method: 'GET', headers: AssetsGatewayClient.getHeaders() }
+                    `${this.basePath}/tree/groups/${group.id}/drives`, 
+                    { method: 'GET', headers: this.getHeaders() }
                 );
                 return createObservableFromFetch(req)
             }),
@@ -161,52 +213,54 @@ export class AssetsGatewayClient {
         )
     }
 
-    static postDrive(
+    postDrive(
         { name, groupId }: { name: string, groupId: string },
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<DriveResponse> {
 
-        let url = `${AssetsGatewayClient.basePath}/tree/groups/${groupId}/drives`
-        let request = new Request(url, { method: 'PUT', body: JSON.stringify({ name }), headers: AssetsGatewayClient.getHeaders() });
+        let url = `${this.basePath}/tree/groups/${groupId}/drives`
+        let request = new Request(url, { method: 'PUT', body: JSON.stringify({ name }), headers: this.getHeaders() });
 
         let follower = new Interfaces.RequestFollower({
             targetId: groupId,
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.UPLOAD
         })
-        follower.start(1)
-
-        return createObservableFromFetch(request).pipe(
+        return of({}).pipe(
+            tap( () => follower.start(1) ), 
+            mergeMap( () =>createObservableFromFetch(request)),
             tap(() => follower.end())
-        )
+        ) as Observable<DriveResponse>
     }
 
-    static postFolder(
+    postFolder(
         { name, parentFolderId }: { name: string, parentFolderId: string },
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<FolderResponse> {
 
-        let url = `${AssetsGatewayClient.basePath}/tree/folders/${parentFolderId}`
-        let request = new Request(url, { method: 'PUT', body: JSON.stringify({ name }), headers: AssetsGatewayClient.getHeaders() });
+        let url = `${this.basePath}/tree/folders/${parentFolderId}`
+        let request = new Request(url, { method: 'PUT', body: JSON.stringify({ name }), headers: this.getHeaders() });
 
         let follower = new Interfaces.RequestFollower({
             targetId: parentFolderId,
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.UPLOAD
         })
-        follower.start(1)
-        return createObservableFromFetch(request).pipe(
+        
+        return of({}).pipe(
+            tap( () => follower.start(1) ), 
+            mergeMap( () => createObservableFromFetch(request)),
             tap(() => follower.end())
-        )
+        ) as  Observable<FolderResponse> 
     }
 
-    static deleteFolder(
+    deleteFolder(
         folderId: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<DeletedEntityResponse> {
 
-        let url = `${AssetsGatewayClient.basePath}/tree/folders/${folderId}`
-        let request = new Request(url, { method: 'DELETE', headers: AssetsGatewayClient.getHeaders() });
+        let url = `${this.basePath}/tree/folders/${folderId}`
+        let request = new Request(url, { method: 'DELETE', headers: this.getHeaders() });
         let follower = new Interfaces.RequestFollower({
             targetId: folderId,
             channels$: events$ ? events$ : [],
@@ -220,90 +274,95 @@ export class AssetsGatewayClient {
         )
     }
 
-    static renameItem(
+    renameItem(
         itemId: string,
         newName: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<ItemResponse> {
 
-        let url = `${AssetsGatewayClient.basePath}/assets/${itemId}`
+        let url = `${this.basePath}/assets/${itemId}`
 
         let follower = new Interfaces.RequestFollower({
             targetId: itemId,
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.UPLOAD
         })
-        follower.start()
-        let request = new Request(url, { method: 'POST', body: JSON.stringify({ name: newName }), headers: AssetsGatewayClient.getHeaders() })
+        
+        let request = new Request(url, { method: 'POST', body: JSON.stringify({ name: newName }), headers: this.getHeaders() })
 
-        return createObservableFromFetch(request).pipe(
+        return of({}).pipe(
+            tap( () => follower.start() ), 
+            mergeMap( () => createObservableFromFetch(request)),
             tap(() => follower.end())
-        )
+        ) as Observable<ItemResponse>
     }
 
-    static renameFolder(
+    renameFolder(
         itemId: string,
         newName: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>):
         Observable<any> {
 
-        let url = `${AssetsGatewayClient.basePath}/tree/folders/${itemId}`
-        let request = new Request(url, { method: 'POST', body: JSON.stringify({ name: newName }), headers: AssetsGatewayClient.getHeaders() })
+        let url = `${this.basePath}/tree/folders/${itemId}`
+        let request = new Request(url, { method: 'POST', body: JSON.stringify({ name: newName }), headers: this.getHeaders() })
         let follower = new Interfaces.RequestFollower({
             targetId: itemId,
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.UPLOAD
         })
-        follower.start()
-        return createObservableFromFetch(request).pipe(
+        
+        return  of({}).pipe(
+            tap( () => follower.start() ), 
+            mergeMap( () => createObservableFromFetch(request)),
             tap(() => follower.end())
         )
     }
 
-    static renameDrive(
+    renameDrive(
         driveId: string,
         newName: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<any> {
 
-        let url = `${AssetsGatewayClient.basePath}/tree/drives/${driveId}`
-        let request = new Request(url, { method: 'POST', body: JSON.stringify({ name: newName }), headers: AssetsGatewayClient.getHeaders() })
+        let url = `${this.basePath}/tree/drives/${driveId}`
+        let request = new Request(url, { method: 'POST', body: JSON.stringify({ name: newName }), headers: this.getHeaders() })
 
         let follower = new Interfaces.RequestFollower({
             targetId: driveId,
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.UPLOAD
         })
-        follower.start()
-
-        return createObservableFromFetch(request).pipe(
+        return of({}).pipe(
+            tap( () => follower.start() ), 
+            mergeMap( () => createObservableFromFetch(request)),
             tap(() => follower.end())
         )
     }
 
-    static deleteItem(
+    deleteItem(
         driveId: string,
         itemId: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<DeletedEntityResponse> {
 
-        let url = `${AssetsGatewayClient.basePath}/tree/${itemId}`
-        let request = new Request(url, { method: 'DELETE', headers: AssetsGatewayClient.getHeaders() });
+        let url = `${this.basePath}/tree/${itemId}`
+        let request = new Request(url, { method: 'DELETE', headers: this.getHeaders() });
 
         let follower = new Interfaces.RequestFollower({
             targetId: driveId,
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.DELETE
         })
-        follower.start()
 
-        return createObservableFromFetch(request).pipe(
+        return of({}).pipe(
+            tap( () => follower.start() ), 
+            mergeMap( () => createObservableFromFetch(request)),
             map((resp: any) => new DeletedEntityResponse(resp)),
             tap(() => follower.end())
         )
     }
 
-    static postFile(
+    postFile(
         folderId: string,
         fileName: string,
         blob: Blob,
@@ -311,7 +370,7 @@ export class AssetsGatewayClient {
     ): Observable<{ itemId: string, name: string, folderId: string }> {
 
         return Interfaces.uploadBlob(
-            `${AssetsGatewayClient.basePath}/assets/data/location/${folderId}`, 
+            `${this.basePath}/assets/data/location/${folderId}`, 
             fileName, blob, {}, undefined, events$
             ).pipe(
                 map(resp => ({ itemId: resp.itemId, name: resp.name, folderId: resp.folderId })
@@ -319,7 +378,7 @@ export class AssetsGatewayClient {
         )
     }
 
-    static updateFile(
+    updateFile(
         driveId: string,
         fileId: string,
         blob: Blob,
@@ -327,7 +386,7 @@ export class AssetsGatewayClient {
     ): Observable<{ itemId: string, name: string, folderId: string }> {
 
         return Interfaces.uploadBlob(
-            `${AssetsGatewayClient.basePath}/drives/${driveId}/files/${fileId}`, 
+            `${this.basePath}/drives/${driveId}/files/${fileId}`, 
             "name does not matter", blob, {}, fileId, events$
             ).pipe(
                 map( resp => ({itemId: resp.itemId, name: resp.name, folderId: resp.folderId})
@@ -335,54 +394,59 @@ export class AssetsGatewayClient {
         )
     }
 
-    static getContent(
+    getContent(
         itemId: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>,
         useCache = true
     ): Observable<Blob> {
         
         return Interfaces.downloadBlob(
-            `${AssetsGatewayClient.basePath}/raw/data/${itemId}`,
+            `${this.basePath}/raw/data/${itemId}`,
             itemId, {}, events$, undefined, useCache)
     }
 
-    static getItem(
+    getItem(
         itemId: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>,
     ): Observable<ItemResponse> {
 
-        let url = `${AssetsGatewayClient.basePath}/tree/items/${itemId}`
-        let request = new Request(url, { method: 'GET', headers: AssetsGatewayClient.getHeaders() });
+        let url = `${this.basePath}/tree/items/${itemId}`
+        let request = new Request(url, { method: 'GET', headers: this.getHeaders() });
 
         let follower = new Interfaces.RequestFollower({
             targetId: itemId,
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.DOWNLOAD
         })
-        follower.start()
 
-        return createObservableFromFetch(request).pipe(
-            tap(() => follower.end())
-        )
+        return of({}).pipe(
+            tap( () => follower.start() ), 
+            mergeMap( () => createObservableFromFetch(request)),
+            tap(() => follower.end()) 
+        ) as Observable<ItemResponse> 
     }
 
-    static getItems(
+    getItems(
         folderId: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<{ folders: Array<FolderResponse>, items: Array<ItemResponse> }> {
 
-        let url = `${AssetsGatewayClient.basePath}/tree/folders/${folderId}/children`
-        let request = new Request(url, { method: 'GET', headers: AssetsGatewayClient.getHeaders() });
+        let url = `${this.basePath}/tree/folders/${folderId}/children`
+        let request = new Request(url, { method: 'GET', headers: this.getHeaders() });
 
         let follower = new Interfaces.RequestFollower({
             targetId: folderId,
             channels$: events$ ? events$ : [],
-            method: Interfaces.Method.DOWNLOAD
+            method: Interfaces.Method.QUERY
         })
-        follower.start()
-
-        return createObservableFromFetch(request).pipe(
-            tap(() => follower.end())
-        )
+        return of({}).pipe(
+            tap( () => {
+                follower.start(1)
+            }), 
+            mergeMap( () => createObservableFromFetch(request)),
+            tap(() =>{
+                follower.end() 
+            })
+        ) as any
     }
 }

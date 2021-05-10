@@ -3,6 +3,50 @@ import { Subject } from "rxjs"
 import { AssetsGatewayClient, EntityNotFoundByName } from "../lib/assets-gateway-client"
 import './mock-requests'
 
+
+test('get groups', (done) => {
+    
+    let follower = new Subject<Interfaces.Event>()
+    let notifications = []
+    follower.subscribe( (event:Interfaces.EventIO) => {
+        notifications.push(event.step)
+    })
+
+    new AssetsGatewayClient().getGroups(follower).subscribe(
+        ({groups}) => {
+            expect(groups.length).toEqual(1)
+            expect(groups[0].id).toEqual("test_group")
+            expect(notifications).toEqual([Interfaces.Step.STARTED, Interfaces.Step.FINISHED])
+            done()
+        },
+        (err) => {
+            throw(err)
+        }
+    )
+})
+
+
+test('get drives', (done) => {
+    
+    let follower = new Subject<Interfaces.Event>()
+    let notifications = []
+    follower.subscribe( (event:Interfaces.EventIO) => {
+        notifications.push(event.step)
+    })
+
+    new AssetsGatewayClient().getDrives("test_group",follower).subscribe(
+        ({drives}) => {
+            expect(drives.length).toEqual(1)
+            expect(drives[0].driveId).toEqual("test_drive")
+            expect(notifications).toEqual([Interfaces.Step.STARTED, Interfaces.Step.FINISHED])
+            done()
+        },
+        (err) => {
+            throw(err)
+        }
+    )
+})
+
 test('get drive', (done) => {
     
     let follower = new Subject<Interfaces.Event>()
@@ -10,7 +54,8 @@ test('get drive', (done) => {
     follower.subscribe( (event:Interfaces.EventIO) => {
         notifications.push(event.step)
     })
-    AssetsGatewayClient.getDrive("/youwol-users/test_group","Test drive",follower).subscribe(
+
+    new AssetsGatewayClient().getDrive("/youwol-users/test_group","Test drive",follower).subscribe(
         (drive) => {
             expect(drive.driveId).toEqual("test_drive")
             expect(notifications).toEqual([Interfaces.Step.STARTED, Interfaces.Step.FINISHED])
@@ -25,7 +70,7 @@ test('get drive', (done) => {
 
 test('get drive wrong group name', (done) => {
 
-    AssetsGatewayClient.getDrive("/youwol-users/tet_group","Test drive").subscribe(
+    new AssetsGatewayClient().getDrive("/youwol-users/tet_group","Test drive").subscribe(
         (drive) => {            
             throw Error('The drive should not exist')
         },
@@ -40,7 +85,7 @@ test('get drive wrong group name', (done) => {
 
 test('get drive wrong drive name', (done) => {
 
-    AssetsGatewayClient.getDrive("/youwol-users/test_group","est drive").subscribe(
+    new AssetsGatewayClient().getDrive("/youwol-users/test_group","est drive").subscribe(
         (drive) => {
             throw Error('The drive should not exist')
         },
@@ -61,7 +106,7 @@ test('post drive', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.postDrive({
+    new AssetsGatewayClient().postDrive({
         name:"test_post_drive", groupId:"/youwol-users/test_group"},
         follower).subscribe(
             (drive) => {
@@ -85,7 +130,7 @@ test('post drive error', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.postDrive({
+    new AssetsGatewayClient().postDrive({
         name:"test_post_drive", groupId:"/youwol-users/error_group"},
         follower).subscribe(
             (drive) => {
@@ -107,7 +152,7 @@ test('post folder', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.postFolder({
+    new AssetsGatewayClient().postFolder({
         name:"test_post_folder", parentFolderId: "parent_folder"},
         follower).subscribe(
             (folder) => {
@@ -132,7 +177,7 @@ test('post folder error', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.postFolder({
+    new AssetsGatewayClient().postFolder({
         name:"test_post_folder", parentFolderId: "error_parent_folder"},
         follower).subscribe(
             (folder) => {
@@ -153,7 +198,7 @@ test('delete folder', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.deleteFolder("test_folder", follower).subscribe(
+    new AssetsGatewayClient().deleteFolder("test_folder", follower).subscribe(
             (folder) => {
                 expect(folder.driveId).toEqual('test_drive')
                 expect(folder.entityId).toEqual('test_folder')
@@ -175,7 +220,7 @@ test('rename item', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.renameItem("test_item", "test_item_new_name", follower).subscribe(
+    new AssetsGatewayClient().renameItem("test_item", "test_item_new_name", follower).subscribe(
             (item) => {
                 expect(item.name).toEqual('test_item_new_name')
                 expect(notifications).toEqual([Interfaces.Step.STARTED, Interfaces.Step.FINISHED])
@@ -195,7 +240,7 @@ test('rename folder', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.renameFolder("test_folder", "test_folder_new_name", follower).subscribe(
+    new AssetsGatewayClient().renameFolder("test_folder", "test_folder_new_name", follower).subscribe(
             (item) => {
                 expect(item.name).toEqual('test_folder_new_name')
                 expect(notifications).toEqual([Interfaces.Step.STARTED, Interfaces.Step.FINISHED])
@@ -215,7 +260,7 @@ test('rename drive', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.renameDrive("test_drive", "test_drive_new_name", follower).subscribe(
+    new AssetsGatewayClient().renameDrive("test_drive", "test_drive_new_name", follower).subscribe(
         (item) => {
             expect(item.name).toEqual('test_drive_new_name')
             expect(notifications).toEqual([Interfaces.Step.STARTED, Interfaces.Step.FINISHED])
@@ -236,7 +281,7 @@ test('delete item', (done) => {
         notifications.push(event.step)
     })
 
-    AssetsGatewayClient.deleteItem("test_drive", "test_item", follower).subscribe(
+    new AssetsGatewayClient().deleteItem("test_drive", "test_item", follower).subscribe(
             (item) => {
                 expect(item.driveId).toEqual('test_drive')
                 expect(item.entityId).toEqual('test_item')
@@ -258,7 +303,7 @@ test('get item', (done) => {
     follower.subscribe( (event:Interfaces.EventIO) => {
         notifications.push(event.step)
     })
-    AssetsGatewayClient.getItem("item_treeId",follower).subscribe(
+    new AssetsGatewayClient().getItem("item_treeId",follower).subscribe(
         (item) => {
             expect(item.treeId).toEqual("item_treeId")
             expect(notifications).toEqual([Interfaces.Step.STARTED, Interfaces.Step.FINISHED])
@@ -278,7 +323,7 @@ test('get items', (done) => {
     follower.subscribe( (event:Interfaces.EventIO) => {
         notifications.push(event.step)
     })
-    AssetsGatewayClient.getItems("folder_tree_id",follower).subscribe(
+    new AssetsGatewayClient().getItems("folder_tree_id",follower).subscribe(
         ({folders, items}) => {
             expect(folders.length).toEqual(1)
             expect(items.length).toEqual(1)

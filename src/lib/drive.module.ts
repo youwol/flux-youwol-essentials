@@ -134,11 +134,11 @@ export namespace ModuleYouwolDrive {
                 `YouWol's group: ${groupName}; drive name: ${driveName}`,
                 {configuration}
             )
-
-            AssetsGatewayClient.getDrive(groupName, driveName)
+            let assetsGtwClient = new AssetsGatewayClient()
+            assetsGtwClient.getDrive(groupName, driveName)
             .subscribe( 
                 (drive) => {
-                    this.drive$.next({data:new Drive(drive.driveId, drive.name, true ), context})
+                    this.drive$.next({data:new Drive(drive.driveId, drive.name, assetsGtwClient, true ), context})
                     context.end()
                 },
                 (error) => {
