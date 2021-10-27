@@ -11,7 +11,7 @@ export class LogoView implements VirtualDOM {
 
     static url = '/api/assets-gateway/raw/package/QHlvdXdvbC9mbHV4LXlvdXdvbC1lc3NlbnRpYWxz/latest/assets/images/logo_YouWol_Platform_white.png'
 
-    public readonly class = `d-flex ${LogoView.ClassSelector}`
+    public readonly class = `d-flex my-auto ${LogoView.ClassSelector}`
 
     public readonly children: VirtualDOM[]
     public readonly badgesView?: VirtualDOM
