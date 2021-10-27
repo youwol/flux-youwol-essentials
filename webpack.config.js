@@ -34,6 +34,7 @@ module.exports = {
         '@youwol/flux-core': "@youwol/flux-core",
         '@youwol/cdn-client': '@youwol/cdn-client',
         '@youwol/flux-files': "@youwol/flux-files",
+        '@youwol/flux-view': "@youwol/flux-view",
     }],
     module: {
         rules: [
