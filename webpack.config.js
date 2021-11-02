@@ -27,13 +27,14 @@ module.exports = {
     externals: [{
         'rxjs': "rxjs",
         'rxjs/operators': {
-            commonjs:'rxjs/operators',
-            commonjs2:'rxjs/operators',
-            root:['rxjs','operators']
+            commonjs: 'rxjs/operators',
+            commonjs2: 'rxjs/operators',
+            root: ['rxjs', 'operators']
         },
         '@youwol/flux-core': "@youwol/flux-core",
         '@youwol/cdn-client': '@youwol/cdn-client',
         '@youwol/flux-files': "@youwol/flux-files",
+        '@youwol/flux-view': "@youwol/flux-view",
     }],
     module: {
         rules: [
@@ -41,8 +42,8 @@ module.exports = {
                 test: /\.ts$/,
                 use: [
                     { loader: 'ts-loader' },
-                  ],
-                  exclude: /node_modules/,
+                ],
+                exclude: /node_modules/,
             }
         ],
     },
