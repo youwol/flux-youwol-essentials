@@ -1,4 +1,5 @@
-import { attr$, VirtualDOM } from "@youwol/flux-view";
+import { install } from "@youwol/cdn-client";
+import { attr$, child$, VirtualDOM } from "@youwol/flux-view";
 import { BehaviorSubject } from "rxjs";
 
 
@@ -50,6 +51,7 @@ export class BurgerMenuView implements VirtualDOM {
 
     static ClassSelector = "burger-menu-view"
 
+    public readonly state: YouwolBannerState
     public readonly showMenu$ = new BehaviorSubject(false)
 
     public readonly class = `my-auto position-relative burger-menu-icon-view ${BurgerMenuView.ClassSelector}`
@@ -68,7 +70,7 @@ export class BurgerMenuView implements VirtualDOM {
      * @param parameters.contentView View displayed when the burger menu is expanded (see [[BurgerMenu]])
      * 
      */
-    constructor(parameters: { contentView: VirtualDOM }) {
+    constructor(parameters: { state: YouwolBannerState, contentView: VirtualDOM }) {
 
         Object.assign(this, parameters)
 
@@ -79,7 +81,30 @@ export class BurgerMenuView implements VirtualDOM {
 
         this.children = [
             {
-                class: 'fas fa-ellipsis-h fv-hover-text-focus fv-pointer p-3'
+                class: 'd-flex align-items-center',
+                children: [
+                    child$(
+                        this.state.settings$,
+                        (settings: { parsed: Settings }) => {
+                            return {
+                                class: 'rounded-circle fv-color-secondary fv-bg-primary text-center d-flex flex-column',
+                                style: {
+                                    width: '40px',
+                                    height: '40px'
+                                },
+                                children: [
+                                    {
+                                        class: "m-auto",
+                                        innerText: settings.parsed.you.avatar
+                                    }
+                                ]
+                            }
+                        }
+                    ),
+                    {
+                        class: 'fas fa-ellipsis-h fv-hover-text-focus fv-pointer p-3'
+                    },
+                ]
             },
             {
                 class: attr$(
@@ -99,6 +124,56 @@ export class BurgerMenuView implements VirtualDOM {
         ]
     }
 
+}
+
+export interface Settings {
+
+    you: { avatar: string },
+    appearance: { theme: string },
+    defaultApplications: { name: string, canOpen: (asset) => boolean, applicationUrl: (asset) => string }[]
+}
+
+
+export class YouwolBannerState {
+
+    static defaultSettings = `
+    return () => ({
+        you:{
+            "avatar": "🦎"
+        },
+        appearance:{
+            "theme":'@youwol/fv-widgets#latest~assets/styles/style.youwol.css'
+        },
+        defaultApplications: [
+            {
+                name: "Visualization 3D",
+                canOpen: (asset) => asset.kind == "data" && asset.name.endsWith('.ts'),
+                applicationURL: (asset) => {
+                    let encoded = encodeURI(JSON.stringify(asset))
+                    return \`/ui/flux-runner/?id=81cfdf74-56ec-4202-bd23-d2049d6d96ab&asset=\${encoded}\`
+                }
+            }
+        ]
+    })
+    `
+    static getSettingsFromLocalStorage() {
+        if (!localStorage.getItem("settings")) {
+            localStorage.setItem("settings", YouwolBannerState.defaultSettings)
+        }
+        let settings = new Function(localStorage.getItem("settings"))()()
+        return { parsed: settings, text: localStorage.getItem("settings") }
+    }
+    settings$ = new BehaviorSubject<{ parsed: Settings, text: string }>(YouwolBannerState.getSettingsFromLocalStorage())
+
+    constructor() {
+    }
+
+    setSettings(settingsTxt: string) {
+        localStorage.setItem("settings", settingsTxt)
+        let settings = new Function(localStorage.getItem("settings"))()()
+        install({ css: [settings.appearance.theme] }).then(() => { })
+        this.settings$.next({ parsed: settings, text: settingsTxt })
+    }
 }
 /**
  * The YouWol top banner
@@ -120,6 +195,8 @@ export class YouwolBannerView implements VirtualDOM {
     public readonly customActionsView?: VirtualDOM
     public readonly burgerMenuView?: VirtualDOM
 
+    public readonly state: YouwolBannerState
+
     /**
      * @params params Parameters
      * @param params.badgesView definition of the badges, see [[BadgeView]]
@@ -127,15 +204,18 @@ export class YouwolBannerView implements VirtualDOM {
      * @param params.burgerMenuView definition of the burger menu
      */
     constructor(params: {
+        state?: YouwolBannerState,
         badgesView?: VirtualDOM,
         customActionsView?: VirtualDOM,
         burgerMenuView?: VirtualDOM
     }) {
         Object.assign(this, params)
+        if (!this.state)
+            this.state = new YouwolBannerState()
         this.children = [
             new LogoView({ badgesView: this.badgesView }),
             this.customActionsView,
-            new BurgerMenuView({ contentView: this.burgerMenuView })
+            new BurgerMenuView({ state: this.state, contentView: this.burgerMenuView })
         ]
     }
 }
