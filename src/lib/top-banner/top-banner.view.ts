@@ -1,136 +1,20 @@
 import { install } from "@youwol/cdn-client";
-import { attr$, child$, VirtualDOM } from "@youwol/flux-view";
-import { BehaviorSubject } from "rxjs";
+import { child$, VirtualDOM } from "@youwol/flux-view";
+import { Button } from "@youwol/fv-button";
+import { BehaviorSubject, Observable, ReplaySubject } from "rxjs";
+import { ExpandableMenu } from "./menu.view";
+import { UserMenuView } from "./user-menu.view";
+import { YouwolMenuView } from "./youwol-menu.view";
 
 
-/**
- * Encapsulates YouWol's logo with optional badges.
- */
-export class LogoView implements VirtualDOM {
 
-    static ClassSelector = "LogoView"
 
-    static url = '/api/assets-gateway/raw/package/QHlvdXdvbC9mbHV4LXlvdXdvbC1lc3NlbnRpYWxz/latest/assets/images/logo_YouWol_Platform_white.png'
-
-    public readonly class = `d-flex my-auto ${LogoView.ClassSelector}`
-
-    public readonly children: VirtualDOM[]
-    public readonly badgesView?: VirtualDOM
-
-    /**
-     * 
-     * @param parameters Constructor's parameters
-     * @param parameters.badgesView if provided, insert the virtual DOM as badge view (see [[BadgeView]] for helpers)
-     */
-    constructor(parameters: { badgesView?: VirtualDOM }) {
-
-        Object.assign(this, parameters)
-
-        this.children = [
-            {
-                style: {
-                    width: '30px',
-                    overflow: 'hidden'
-                },
-                children: [{
-                    tag: 'img',
-                    class: `my-auto ${LogoView.ClassSelector}`,
-                    src: LogoView.url,
-                    style: { width: '200px' },
-                }]
-            },
-            this.badgesView || {}
-        ]
-    }
-}
-
-/**
- * Define the burger menu of [[YouwolBannerView]]
- */
-export class BurgerMenuView implements VirtualDOM {
-
-    static ClassSelector = "burger-menu-view"
-
-    public readonly state: YouwolBannerState
-    public readonly showMenu$ = new BehaviorSubject(false)
-
-    public readonly class = `my-auto position-relative burger-menu-icon-view ${BurgerMenuView.ClassSelector}`
-    public readonly style = {
-        zIndex: 10
-    }
-    children: VirtualDOM[]
-
-    onclick: () => void
-    onmouseleave: () => void
-
-    public readonly contentView: VirtualDOM
-    /**
-     * 
-     * @param parameters Constructor's parameters
-     * @param parameters.contentView View displayed when the burger menu is expanded (see [[BurgerMenu]])
-     * 
-     */
-    constructor(parameters: { state: YouwolBannerState, contentView: VirtualDOM }) {
-
-        Object.assign(this, parameters)
-
-        let showMenu$ = new BehaviorSubject(false)
-
-        this.onclick = () => showMenu$.next(!showMenu$.getValue())
-        this.onmouseleave = () => showMenu$.next(false)
-
-        this.children = [
-            {
-                class: 'd-flex align-items-center',
-                children: [
-                    child$(
-                        this.state.settings$,
-                        (settings: { parsed: Settings }) => {
-                            return {
-                                class: 'rounded-circle fv-color-secondary fv-bg-primary text-center d-flex flex-column',
-                                style: {
-                                    width: '40px',
-                                    height: '40px'
-                                },
-                                children: [
-                                    {
-                                        class: "m-auto",
-                                        innerText: settings.parsed.you.avatar
-                                    }
-                                ]
-                            }
-                        }
-                    ),
-                    {
-                        class: 'fas fa-ellipsis-h fv-hover-text-focus fv-pointer p-3'
-                    },
-                ]
-            },
-            {
-                class: attr$(
-                    showMenu$,
-                    (show) => show ? 'd-block' : 'd-none',
-                    {
-                        wrapper: (classes) => classes + ' position-absolute rounded border fv-color-primary fv-bg-background-alt content-container'
-                    }
-                ),
-                style: {
-                    right: '0px'
-                },
-                children: [
-                    this.contentView
-                ]
-            }
-        ]
-    }
-
-}
 
 export interface Settings {
 
     you: { avatar: string },
     appearance: { theme: string },
-    defaultApplications: { name: string, canOpen: (asset) => boolean, applicationUrl: (asset) => string }[]
+    defaultApplications: { name: string, canOpen: (asset) => boolean, applicationURL: (asset) => string }[]
 }
 
 
@@ -139,33 +23,53 @@ export class YouwolBannerState {
     static defaultSettings = `
     return () => ({
         you:{
-            "avatar": "🦎"
+            "avatar": {
+                class: 'rounded-circle fv-color-secondary fv-bg-primary text-center fv-text-on-primary d-flex flex-column',
+                style: {
+                    width: '35px',
+                    height: '35px',
+                    userSelect: 'none'
+                },
+                children: [
+                    {
+                        class: "m-auto",
+                        innerText:'🦎'
+                    }
+                ]
+            }
         },
         appearance:{
             "theme":'@youwol/fv-widgets#latest~assets/styles/style.youwol.css'
         },
         defaultApplications: [
-            {
-                name: "Visualization 3D",
-                canOpen: (asset) => asset.kind == "data" && asset.name.endsWith('.ts'),
-                applicationURL: (asset) => {
-                    let encoded = encodeURI(JSON.stringify(asset))
-                    return \`/ui/flux-runner/?id=81cfdf74-56ec-4202-bd23-d2049d6d96ab&asset=\${encoded}\`
-                }
-            }
         ]
     })
     `
+
+    cmEditorModule$: Observable<any>
+
+    /*
+    {
+        name: "Visualization 3D",
+        canOpen: (asset) => asset.kind == "data" && asset.name.endsWith('.ts'),
+        applicationURL: (asset) => {
+            let encoded = encodeURI(JSON.stringify(asset))
+            return \`/ui/flux-runner/?id=81cfdf74-56ec-4202-bd23-d2049d6d96ab&asset=\${encoded}\`
+        }
+    }
+    */
     static getSettingsFromLocalStorage() {
         if (!localStorage.getItem("settings")) {
             localStorage.setItem("settings", YouwolBannerState.defaultSettings)
         }
-        let settings = new Function(localStorage.getItem("settings"))()()
+        let saved = localStorage.getItem("settings")
+        let settings = new Function(saved)()()
         return { parsed: settings, text: localStorage.getItem("settings") }
     }
     settings$ = new BehaviorSubject<{ parsed: Settings, text: string }>(YouwolBannerState.getSettingsFromLocalStorage())
 
-    constructor() {
+    constructor(params: { cmEditorModule$: Observable<any> }) {
+        Object.assign(this, params)
     }
 
     setSettings(settingsTxt: string) {
@@ -175,6 +79,8 @@ export class YouwolBannerState {
         this.settings$.next({ parsed: settings, text: settingsTxt })
     }
 }
+
+
 /**
  * The YouWol top banner
  * 
@@ -188,12 +94,16 @@ export class YouwolBannerView implements VirtualDOM {
 
     static ClassSelector = "youwol-banner-view"
 
-    public readonly class = `d-flex w-100 fv-text-primary justify-content-between align-self-center  px-3  border-bottom ${YouwolBannerView.ClassSelector}`
+    public readonly class = `d-flex w-100 position-relative fv-text-primary justify-content-between align-self-center  px-3  border-bottom ${YouwolBannerView.ClassSelector}`
+    public readonly style = {
+        height: '50px'
+    }
     public readonly children: Array<VirtualDOM>
 
     public readonly badgesView?: VirtualDOM
     public readonly customActionsView?: VirtualDOM
-    public readonly burgerMenuView?: VirtualDOM
+    public readonly userMenuView?: VirtualDOM
+    public readonly youwolMenuView?: VirtualDOM
 
     public readonly state: YouwolBannerState
 
@@ -201,21 +111,53 @@ export class YouwolBannerView implements VirtualDOM {
      * @params params Parameters
      * @param params.badgesView definition of the badges, see [[BadgeView]]
      * @param params.customActionsView definition of the custom actions of the app
-     * @param params.burgerMenuView definition of the burger menu
+     * @param params.userMenuView definition of the user's menu
+     * @param params.youwolMenuView definition of the youwol's menu
      */
     constructor(params: {
-        state?: YouwolBannerState,
+        state: YouwolBannerState,
         badgesView?: VirtualDOM,
-        customActionsView?: VirtualDOM,
-        burgerMenuView?: VirtualDOM
+        customActionsView: VirtualDOM,
+        userMenuView: VirtualDOM,
+        youwolMenuView: VirtualDOM,
+        signedIn$: Observable<boolean>
     }) {
         Object.assign(this, params)
-        if (!this.state)
-            this.state = new YouwolBannerState()
+
         this.children = [
-            new LogoView({ badgesView: this.badgesView }),
+            new YouwolMenuView({ badgesView: this.badgesView, youwolMenuView: this.youwolMenuView }),
             this.customActionsView,
-            new BurgerMenuView({ state: this.state, contentView: this.burgerMenuView })
+            child$(
+                params.signedIn$,
+                (result) => {
+                    return result
+                        ? new UserMenuView({ state: this.state, contentView: this.userMenuView })
+                        : new LoginView()
+                })
         ]
+    }
+}
+
+export class LoginView implements VirtualDOM {
+
+    static ClassSelector = "login-view"
+    class = `${LoginView.ClassSelector}`
+    children = [
+        new ButtonView('login', 'mx-2 fv-text-primary'),
+        new ButtonView('register', 'mx-2 fv-text-primary')
+    ]
+    style = { maxWidth: '250px' }
+
+    constructor() { }
+}
+
+
+export class ButtonView extends Button.View {
+
+    class = 'fv-btn fv-bg-secondary-alt fv-hover-bg-secondary'
+
+    constructor(name: string, withClass: string = "") {
+        super({ state: new Button.State(), contentView: () => ({ innerText: name }) })
+        this.class = `${this.class} ${withClass}`
     }
 }
