@@ -6,3 +6,4 @@ export * from './drive.module';
 export * from './drive';
 export * from './assets-gateway-client';
 export * from './top-banner/index'
+export * from './youwol-spinner.view'
