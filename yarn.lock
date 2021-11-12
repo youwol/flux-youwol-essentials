@@ -809,40 +809,45 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@youwol/cdn-client@0.x":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@youwol/cdn-client/-/cdn-client-0.0.3.tgz#92d0b2ecc630b0eb1d27673c6cc7a764689cfa48"
-  integrity sha512-9XLLKM/hkBoH6T0S79dIALETtQrKExKs7NOTgaAkQY0ibaa0l6DGH4XIjJzRugfP+bF7HzYzBzfMNbendgjnFg==
+"@youwol/cdn-client@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@youwol/cdn-client/-/cdn-client-0.0.10.tgz#38a89da85b77fc16e5c5a81638912dd23e620843"
+  integrity sha512-w+HT/6KBZEU5WnxcFJ6Vx3ktrRxLD9woGdUx45yrcaPI0dz5xC8iCmQl7utxgMLeGEbS9S83GUQ9mRchbMufrg==
 
-"@youwol/flux-core@0.x":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@youwol/flux-core/-/flux-core-0.0.7.tgz#ea059fd79c914f0f20d93ca5cf8edcd572140071"
-  integrity sha512-AaEzvxrc/B0AeXEDf4rYbF12qMcsABDHyZrQB0j6bo1A9tE85RyZr1cvYBhHLdamp9eFAi0J6nbMges6rD9FVg==
+"@youwol/flux-core@^0.0.21":
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/@youwol/flux-core/-/flux-core-0.0.21.tgz#1710317b9d14946122ea187c4d8ec477e56e3f65"
+  integrity sha512-hHn8ODizOwS1o0vZT7pYCPqdVPb466PZCVtVtGoT+tuv3NC6dJ12LXdYOhUfvruxTXZDoXS1PVJNca7MhcQFJw==
 
-"@youwol/flux-files@0.x":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@youwol/flux-files/-/flux-files-0.0.3.tgz#a20dd777e5235afe46ca27a71b6cec10f6841802"
-  integrity sha512-lxmRJlXCdgKodX/7G3JHQz8eVfnP0YEwl/FKY94Buur+OsIyJrAYHq0WYYbPPPqssCCyd5D0AvXLRSqBBLA0/Q==
+"@youwol/flux-files@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@youwol/flux-files/-/flux-files-0.0.5.tgz#8a26386289717ff1674470d4a597644c20717c4e"
+  integrity sha512-gwLz0Y8RKPISS8byuQqEF7TZUbA6wP8dtr93jbfiXCMxiNJmBSFxdNANPycoU/lEHU7fQMpgGMP75nACyS+19Q==
 
-"@youwol/flux-view@0.x":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@youwol/flux-view/-/flux-view-0.0.6.tgz#1fb09ab9f96442efeea1d070463a4cdd82eace83"
-  integrity sha512-uDi63Fav87HqlryVN1V517VInw9bPEnbFt+vicdXEiWzkC1Qg2xYTpSti4sYGbRq9Thf9c+Xm/sA1Kt0ONocyw==
+"@youwol/flux-view@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@youwol/flux-view/-/flux-view-0.0.10.tgz#1108978e737af789b8bcaa8f95bd8f76f08e972c"
+  integrity sha512-N0+xS7EPdVH3z4CxhmFHfPrH6mr865E/pdMS/3Np25mF4hJ55DuC+LgW3mWxopuh9C9g67EzTrRN5aVH+cuP2g==
 
-"@youwol/fv-button@0.x":
+"@youwol/fv-button@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@youwol/fv-button/-/fv-button-0.0.3.tgz#c98f13d748b07ba04e8599f0016403cf3fcb54bc"
   integrity sha512-+1h4HbH3NT5FVfv0ps5wCDtgGgicNF0ZXMbG74K42JbUVrAyZHmSlIaXiwfkdG53r9jKHH8/b1wvLobk9Daopg==
 
-"@youwol/fv-group@0.x":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@youwol/fv-group/-/fv-group-0.0.3.tgz#d033a4004a2737540ab98c6596ac29a3f64217ce"
-  integrity sha512-IX/6VNhWcqDabunNTqP2bxWhOv0n4Mungk+15h1BQi58OCQYvDnukHaDhJNF+HBhX6q5bGnRr7eX7HdhhvKIwg==
+"@youwol/fv-group@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@youwol/fv-group/-/fv-group-0.0.4.tgz#c2f0569fe4a2b8f008c2ec4224a59a1ab84f51e3"
+  integrity sha512-hkHwJP/zoQfGPkdtLAOAhw10wA26gqhxCPBEXcx2uDAHYyHkCSuf3j08rqPDt54jncYlsOWxiopd8D+XewIaDw==
 
-"@youwol/fv-tree@0.x":
+"@youwol/fv-tree@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@youwol/fv-tree/-/fv-tree-0.0.3.tgz#e69984cee4822a0be90947a6f48ba9223588f0a0"
   integrity sha512-QHZIpHNX9rzMafKTpOvjzx7Z2dNdzjTDbAtgUU8+AmAX5p1IB2i2Ws2N5TaYNn5xvIdVezebBedJnCRrGXlZcQ==
+
+"@youwol/fv-widgets@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@youwol/fv-widgets/-/fv-widgets-0.0.4.tgz#3fdb769a509e6761630d79505fe77f8a5d4da56c"
+  integrity sha512-hmGuju+TyDo4DQOP+PhLXsDMH+TEULcU2Q2NGWIBMOuC/YrFTtBZ115jVdC7RohMCoIrLm6TkC8KdtaFZeoYOw==
 
 abab@^2.0.3, abab@^2.0.5:
   version "2.0.5"
@@ -1407,6 +1412,13 @@ core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
+
+cross-fetch@^3.0.4:
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.4.tgz#9723f3a3a247bf8b89039f3a380a9244e8fa2f39"
+  integrity sha512-1eAtFWdIubi6T4XPy6ei9iUFoKpUkIF971QLN8lIvvvwueI65+Nw5haMNKUwfJxabqlIIDODJKGrQ66gxC0PbQ==
+  dependencies:
+    node-fetch "2.6.1"
 
 cross-spawn@^6.0.0:
   version "6.0.5"
@@ -2666,6 +2678,14 @@ jest-environment-node@^26.6.2:
     jest-mock "^26.6.2"
     jest-util "^26.6.2"
 
+jest-fetch-mock@3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/jest-fetch-mock/-/jest-fetch-mock-3.0.3.tgz#31749c456ae27b8919d69824f1c2bd85fe0a1f3b"
+  integrity sha512-Ux1nWprtLrdrH4XwE7O7InRY6psIi3GOsqNESJgMJ+M5cv4A8Lh7SN9d2V2kKRZ8ebAfcd1LNyZguAOb6JiDqw==
+  dependencies:
+    cross-fetch "^3.0.4"
+    promise-polyfill "^8.1.3"
+
 jest-get-type@^26.3.0:
   version "26.3.0"
   resolved "https://registry.yarnpkg.com/jest-get-type/-/jest-get-type-26.3.0.tgz#e97dc3c3f53c2b406ca7afaed4493b1d099199e0"
@@ -3365,6 +3385,11 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
+node-fetch@2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
+  integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
+
 node-int64@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
@@ -3652,6 +3677,11 @@ progress@^2.0.0, progress@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
   integrity sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==
+
+promise-polyfill@^8.1.3:
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/promise-polyfill/-/promise-polyfill-8.2.1.tgz#1fa955b325bee4f6b8a4311e18148d4e5b46d254"
+  integrity sha512-3p9zj0cEHbp7NVUxEYUWjQlffXqnXaZIMPkAO7HhFh8u5636xLRDHOUo2vpWSK0T2mqm6fKLXYn1KP6PAZ2gKg==
 
 prompts@^2.0.1:
   version "2.4.0"
