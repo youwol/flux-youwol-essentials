@@ -98,9 +98,7 @@ export class BannerView extends YouwolBannerView {
 }
 
 
-
 test('rendering: what should be displayed is displayed', (done) => {
-
 
     let state = new TopBannerState()
     let bannerView = new BannerView({ state, signedIn: true })

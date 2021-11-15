@@ -25,7 +25,7 @@ export interface DrivesResponse {
 
     drives: Array<{
         driveId: string
-        name: string 
+        name: string
     }>
 }
 
@@ -69,16 +69,16 @@ export class ProgressMessage {
     }
 }
 
-export class EntityNotFoundByName extends Error{
+export class EntityNotFoundByName extends Error {
 
     constructor(
-        public readonly entityName: string, 
+        public readonly entityName: string,
         ...params) {
 
         super(...params)
-        if(Error.captureStackTrace) {
+        if (Error.captureStackTrace) {
             Error.captureStackTrace(this, EntityNotFoundByName);
-          }
+        }
         this.name = 'GroupNotFound';
     }
 }
@@ -112,35 +112,35 @@ export class AssetsGatewayClient {
     }:
         {
             basePath?: string,
-            headers?: {[key:string]: string}
-        } = {}) { 
+            headers?: { [key: string]: string }
+        } = {}) {
 
-            this.basePath = basePath || "/api/assets-gateway"
-            this.headers = headers || {}
+        this.basePath = basePath || "/api/assets-gateway"
+        this.headers = headers || {}
 
-        }
+    }
 
     getHeaders() {
         return new Headers(this.headers)
     }
 
     getGroups(events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
-        ): Observable<GroupsResponse>{
-        
+    ): Observable<GroupsResponse> {
+
         let follower = new Interfaces.RequestFollower({
             targetId: `getGroups`,
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.QUERY
         })
-        
+
         let requestGroups = new Request(
             `${this.basePath}/groups`,
             { method: 'GET', headers: this.getHeaders() }
         );
         return of({}).pipe(
-            tap( () => follower.start(1) ), 
-            mergeMap( () => createObservableFromFetch(requestGroups)),
-            tap(() => follower.end()) 
+            tap(() => follower.start(1)),
+            mergeMap(() => createObservableFromFetch(requestGroups)),
+            tap(() => follower.end())
         ) as any
     }
 
@@ -161,10 +161,10 @@ export class AssetsGatewayClient {
         })
 
         return of({}).pipe(
-            tap( () => follower.start(1) ), 
-            mergeMap( () =>createObservableFromFetch(requestGroups)),
+            tap(() => follower.start(1)),
+            mergeMap(() => createObservableFromFetch(requestGroups)),
             tap(() => follower.end())
-        ) as  Observable<DrivesResponse> 
+        ) as Observable<DrivesResponse>
     }
 
 
@@ -186,8 +186,8 @@ export class AssetsGatewayClient {
         })
 
         return of({}).pipe(
-            tap( () => follower.start(1) ), 
-            mergeMap( () =>createObservableFromFetch(requestGroups)),
+            tap(() => follower.start(1)),
+            mergeMap(() => createObservableFromFetch(requestGroups)),
             map((resp: any) => {
                 return resp.groups.find(g => g.path == groupName)
             }),
@@ -197,14 +197,14 @@ export class AssetsGatewayClient {
             }),
             mergeMap((group: any) => {
                 let req = new Request(
-                    `${this.basePath}/tree/groups/${group.id}/drives`, 
+                    `${this.basePath}/tree/groups/${group.id}/drives`,
                     { method: 'GET', headers: this.getHeaders() }
                 );
                 return createObservableFromFetch(req)
             }),
-            map((resp: {drives: Array<DriveResponse>}) => {
+            map((resp: { drives: Array<DriveResponse> }) => {
                 let drive = resp.drives.find(d => d.name == driveName)
-                if(drive){
+                if (drive) {
                     return drive
                 }
                 throw new EntityNotFoundByName(driveName, `Drive '${driveName}' not found`)
@@ -227,8 +227,8 @@ export class AssetsGatewayClient {
             method: Interfaces.Method.UPLOAD
         })
         return of({}).pipe(
-            tap( () => follower.start(1) ), 
-            mergeMap( () =>createObservableFromFetch(request)),
+            tap(() => follower.start(1)),
+            mergeMap(() => createObservableFromFetch(request)),
             tap(() => follower.end())
         ) as Observable<DriveResponse>
     }
@@ -246,12 +246,12 @@ export class AssetsGatewayClient {
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.UPLOAD
         })
-        
+
         return of({}).pipe(
-            tap( () => follower.start(1) ), 
-            mergeMap( () => createObservableFromFetch(request)),
+            tap(() => follower.start(1)),
+            mergeMap(() => createObservableFromFetch(request)),
             tap(() => follower.end())
-        ) as  Observable<FolderResponse> 
+        ) as Observable<FolderResponse>
     }
 
     deleteFolder(
@@ -287,12 +287,12 @@ export class AssetsGatewayClient {
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.UPLOAD
         })
-        
+
         let request = new Request(url, { method: 'POST', body: JSON.stringify({ name: newName }), headers: this.getHeaders() })
 
         return of({}).pipe(
-            tap( () => follower.start() ), 
-            mergeMap( () => createObservableFromFetch(request)),
+            tap(() => follower.start()),
+            mergeMap(() => createObservableFromFetch(request)),
             tap(() => follower.end())
         ) as Observable<ItemResponse>
     }
@@ -310,10 +310,10 @@ export class AssetsGatewayClient {
             channels$: events$ ? events$ : [],
             method: Interfaces.Method.UPLOAD
         })
-        
-        return  of({}).pipe(
-            tap( () => follower.start() ), 
-            mergeMap( () => createObservableFromFetch(request)),
+
+        return of({}).pipe(
+            tap(() => follower.start()),
+            mergeMap(() => createObservableFromFetch(request)),
             tap(() => follower.end())
         )
     }
@@ -333,8 +333,8 @@ export class AssetsGatewayClient {
             method: Interfaces.Method.UPLOAD
         })
         return of({}).pipe(
-            tap( () => follower.start() ), 
-            mergeMap( () => createObservableFromFetch(request)),
+            tap(() => follower.start()),
+            mergeMap(() => createObservableFromFetch(request)),
             tap(() => follower.end())
         )
     }
@@ -355,8 +355,8 @@ export class AssetsGatewayClient {
         })
 
         return of({}).pipe(
-            tap( () => follower.start() ), 
-            mergeMap( () => createObservableFromFetch(request)),
+            tap(() => follower.start()),
+            mergeMap(() => createObservableFromFetch(request)),
             map((resp: any) => new DeletedEntityResponse(resp)),
             tap(() => follower.end())
         )
@@ -370,10 +370,10 @@ export class AssetsGatewayClient {
     ): Observable<{ itemId: string, name: string, folderId: string }> {
 
         return Interfaces.uploadBlob(
-            `${this.basePath}/assets/data/location/${folderId}`, 
+            `${this.basePath}/assets/data/location/${folderId}`,
             fileName, blob, {}, undefined, events$
-            ).pipe(
-                map(resp => ({ itemId: resp.itemId, name: resp.name, folderId: resp.folderId })
+        ).pipe(
+            map(resp => ({ itemId: resp.itemId, name: resp.name, folderId: resp.folderId })
             )
         )
     }
@@ -386,10 +386,10 @@ export class AssetsGatewayClient {
     ): Observable<{ itemId: string, name: string, folderId: string }> {
 
         return Interfaces.uploadBlob(
-            `${this.basePath}/drives/${driveId}/files/${fileId}`, 
+            `${this.basePath}/drives/${driveId}/files/${fileId}`,
             "name does not matter", blob, {}, fileId, events$
-            ).pipe(
-                map( resp => ({itemId: resp.itemId, name: resp.name, folderId: resp.folderId})
+        ).pipe(
+            map(resp => ({ itemId: resp.itemId, name: resp.name, folderId: resp.folderId })
             )
         )
     }
@@ -399,7 +399,7 @@ export class AssetsGatewayClient {
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>,
         useCache = true
     ): Observable<Blob> {
-        
+
         return Interfaces.downloadBlob(
             `${this.basePath}/raw/data/${itemId}`,
             itemId, {}, events$, undefined, useCache)
@@ -420,10 +420,10 @@ export class AssetsGatewayClient {
         })
 
         return of({}).pipe(
-            tap( () => follower.start() ), 
-            mergeMap( () => createObservableFromFetch(request)),
-            tap(() => follower.end()) 
-        ) as Observable<ItemResponse> 
+            tap(() => follower.start()),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => follower.end())
+        ) as Observable<ItemResponse>
     }
 
     getItems(
@@ -440,12 +440,12 @@ export class AssetsGatewayClient {
             method: Interfaces.Method.QUERY
         })
         return of({}).pipe(
-            tap( () => {
+            tap(() => {
                 follower.start(1)
-            }), 
-            mergeMap( () => createObservableFromFetch(request)),
-            tap(() =>{
-                follower.end() 
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
             })
         ) as any
     }
