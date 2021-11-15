@@ -50,6 +50,27 @@ export interface ItemResponse {
     borrowed: boolean
 }
 
+
+export interface Permissions {
+    read: boolean
+    write: boolean
+}
+
+
+export interface Asset {
+
+    readonly assetId: string
+    readonly rawId: string
+    readonly kind: string
+    readonly name: string
+    readonly groupId: string
+    readonly description: string
+    readonly images: Array<string>
+    readonly thumbnails: Array<string>
+    readonly tags: Array<string>
+    readonly permissions: Permissions
+}
+
 export const UploadStep = {
     START: 'start',
     SENDING: 'sending',
@@ -448,5 +469,12 @@ export class AssetsGatewayClient {
                 follower.end()
             })
         ) as any
+    }
+
+    getAsset$(assetId: string): Observable<Asset> {
+
+        let url = `${this.basePath}/assets/${assetId}`
+        let request = new Request(url)
+        return createObservableFromFetch(request)
     }
 }
