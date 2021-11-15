@@ -1,8 +1,9 @@
 import { install } from "@youwol/cdn-client";
 import { child$, VirtualDOM } from "@youwol/flux-view";
 import { Button } from "@youwol/fv-button";
-import { BehaviorSubject, Observable, ReplaySubject } from "rxjs";
-import { ExpandableMenu } from "./menu.view";
+import { BehaviorSubject, from, Observable, of, ReplaySubject } from "rxjs";
+import { mergeMap, tap } from "rxjs/operators";
+import { ExpandableMenu, UserSettings } from "./menu.view";
 import { UserMenuView } from "./user-menu.view";
 import { YouwolMenuView } from "./youwol-menu.view";
 
@@ -74,12 +75,18 @@ export class YouwolBannerState {
 
     setSettings(settingsTxt: string) {
         localStorage.setItem("settings", settingsTxt)
-        let settings = new Function(localStorage.getItem("settings"))()()
-        install({ css: [settings.appearance.theme] }).then(() => { })
-        this.settings$.next({ parsed: settings, text: settingsTxt })
+        getSettings$().pipe(
+            tap((settings: Settings) => install({ css: [settings.appearance.theme] }).then())
+        )
+            .subscribe((settings) => this.settings$.next({ parsed: settings, text: settingsTxt }))
     }
 }
 
+export function getSettings$(): Observable<Settings> {
+
+    let settings = new Function(localStorage.getItem("settings"))()()
+    return of(settings)
+}
 
 /**
  * The YouWol top banner
