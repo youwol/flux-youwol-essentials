@@ -103,7 +103,7 @@ export class YouwolBannerView implements VirtualDOM {
 
     public readonly class = `d-flex w-100 position-relative fv-text-primary justify-content-between align-self-center  px-3  border-bottom ${YouwolBannerView.ClassSelector}`
     public readonly style = {
-        height: '50px'
+        minHeight: '50px'
     }
     public readonly children: Array<VirtualDOM>
 
