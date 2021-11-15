@@ -1,6 +1,6 @@
 {
     "name": "@youwol/flux-youwol-essentials",
-    "version": "0.0.5",
+    "version": "0.0.5-next",
     "description": "Essential modules to work with YouWol's assets",
     "author": "greinisch@youwol.com",
     "keywords": [
@@ -30,6 +30,7 @@
         "@youwol/fv-button": "^0.0.3",
         "@youwol/fv-group": "^0.0.4",
         "@youwol/fv-tree": "^0.0.3",
+        "@youwol/fv-tabs": "^0.0.2",
         "@youwol/fv-widgets":"^0.0.4",
         "lodash": "4.x",
         "reflect-metadata": "0.x",
@@ -45,6 +46,7 @@
         "@youwol/fv-button": "^0.0.3",
         "@youwol/fv-group": "^0.0.4",
         "@youwol/fv-tree": "^0.0.3",
+        "@youwol/fv-tabs": "^0.0.2",
         "@youwol/fv-widgets":"^0.0.4",
         "eslint": "7.23.0",
         "eslint-webpack-plugin": "2.5.3",
@@ -75,7 +77,8 @@
             "@youwol/flux-view": "^0.0.10",
             "@youwol/fv-button": "^0.0.3",
             "@youwol/fv-group": "^0.0.4",
-            "@youwol/fv-tree": "^0.0.3"
+            "@youwol/fv-tree": "^0.0.3",
+            "@youwol/fv-tabs": "^0.0.2"
         }
     }
 }

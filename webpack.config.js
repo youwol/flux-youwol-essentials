@@ -37,7 +37,8 @@ module.exports = {
         '@youwol/flux-view': "@youwol/flux-view",
         '@youwol/fv-group': '@youwol/fv-group',
         "@youwol/fv-button": "@youwol/fv-button",
-        "@youwol/fv-tree": "@youwol/fv-tree"
+        "@youwol/fv-tree": "@youwol/fv-tree",
+        "@youwol/fv-tabs": "@youwol/fv-tabs"
     }],
     module: {
         rules: [
