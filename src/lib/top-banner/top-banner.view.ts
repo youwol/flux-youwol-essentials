@@ -125,22 +125,24 @@ export class YouwolBannerView implements VirtualDOM {
         state: YouwolBannerState,
         badgesView?: VirtualDOM,
         customActionsView: VirtualDOM,
-        userMenuView: VirtualDOM,
-        youwolMenuView: VirtualDOM,
+        userMenuView?: VirtualDOM,
+        youwolMenuView?: VirtualDOM,
         signedIn$: Observable<boolean>
     }) {
         Object.assign(this, params)
 
         this.children = [
-            new YouwolMenuView({ badgesView: this.badgesView, youwolMenuView: this.youwolMenuView }),
+            this.youwolMenuView ? new YouwolMenuView({ badgesView: this.badgesView, youwolMenuView: this.youwolMenuView }) : {},
             this.customActionsView,
-            child$(
-                params.signedIn$,
-                (result) => {
-                    return result
-                        ? new UserMenuView({ state: this.state, contentView: this.userMenuView })
-                        : new LoginView()
-                })
+            this.userMenuView
+                ? child$(
+                    params.signedIn$,
+                    (result) => {
+                        return result
+                            ? new UserMenuView({ state: this.state, contentView: this.userMenuView })
+                            : new LoginView()
+                    })
+                : {}
         ]
     }
 }
