@@ -4,6 +4,11 @@ import { map, mergeMap, tap } from 'rxjs/operators';
 import { Interfaces } from '@youwol/flux-files'
 
 
+
+type ItemId = string
+type FolderId = string
+type DriveId = string
+
 export interface GroupResponse {
 
     id: string
@@ -497,6 +502,16 @@ export class AssetsGatewayClient {
 
         let url = `${this.basePath}/assets/${assetId}`
         let request = new Request(url)
+        return createObservableFromFetch(request)
+    }
+
+
+    borrowItem$(targetTreeId: ItemId | FolderId, destinationTreeId: FolderId | DriveId) {
+
+        let url = `${this.basePath}/tree/${targetTreeId}/borrow`
+        let body = { destinationFolderId: destinationTreeId }
+
+        let request = new Request(url, { method: 'POST', body: JSON.stringify(body), headers: this.headers })
         return createObservableFromFetch(request)
     }
 }
