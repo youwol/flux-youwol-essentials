@@ -2,7 +2,8 @@ import { expectAttribute } from "@youwol/flux-core";
 import { Modal } from "@youwol/fv-group";
 import { of } from "rxjs"
 import { popupAssetModalView } from "../..";
-import { AssetModalView, FluxProjectActionsView } from "../../lib/assets/asset-modal.view";
+import { AssetCardView } from "../../lib/assets/asset-card/asset-card.view";
+import { FluxProjectActionsView } from "../../lib/assets/asset-card/asset-specific/flux";
 import { ImagesCarouselView } from "../../lib/assets/utils.view";
 
 
@@ -21,7 +22,7 @@ beforeEach(() => {
     `)
 });
 
-
+/*
 test('asset modal-view => kind=flux-project', (done) => {
 
     let asset = {
@@ -146,3 +147,4 @@ test('asset modal-view => kind=data with default app', (done) => {
     expect(iframe).toBeTruthy()
     done()
 })
+*/

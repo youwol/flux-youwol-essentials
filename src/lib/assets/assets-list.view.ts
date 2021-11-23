@@ -2,7 +2,7 @@ import { child$, childrenAppendOnly$, VirtualDOM } from "@youwol/flux-view"
 import { Observable, ReplaySubject } from "rxjs"
 import { Asset } from "../assets-gateway-client"
 import { ywSpinnerView } from "../youwol-spinner.view"
-import { AssetCardView, AssetPresenterTrait } from "./asset-card.view"
+import { AssetSnippetView, AssetPresenterTrait } from "./asset-snippet.view"
 
 /**
  * # AssetsListView
@@ -29,7 +29,7 @@ export class AssetsListView implements VirtualDOM {
                 class: "w-100 d-flex flex-wrap justify-content-around ",
                 children: childrenAppendOnly$(
                     this.assets$,
-                    (asset: Asset) => new AssetCardView({ asset, state: this.state }),
+                    (asset: Asset) => new AssetSnippetView({ asset, state: this.state }),
                     { sideEffects: () => elementInDoc$.next(true) }
                 )
             },

@@ -1,6 +1,6 @@
 import { render } from "@youwol/flux-view";
 import { BehaviorSubject } from "rxjs"
-import { AssetCardView } from "../.."
+import { AssetSnippetView } from "../.."
 
 
 beforeEach(() => {
@@ -35,14 +35,14 @@ test('render an asset-card, no images', (done) => {
             done()
         }
     }
-    let view = new AssetCardView({
+    let view = new AssetSnippetView({
         asset,
         state
     })
     document.body.appendChild(render(view))
-    let elem = document.querySelector(`.${AssetCardView.ClassSelector}`)
+    let elem = document.querySelector(`.${AssetSnippetView.ClassSelector}`)
     expect(elem).toBeTruthy()
-    let selected = document.querySelector(`.${AssetCardView.ClassSelector} .selected`)
+    let selected = document.querySelector(`.${AssetSnippetView.ClassSelector} .selected`)
     expect(selected).toBeFalsy()
     elem.dispatchEvent(new MouseEvent('click', { bubbles: true }))
 
@@ -69,7 +69,7 @@ test('render an asset-card, with images', (done) => {
         selectedAsset$: new BehaviorSubject("test-asset"),
         selectAsset: () => { }
     }
-    let view = new AssetCardView({
+    let view = new AssetSnippetView({
         asset,
         state
     })

@@ -1,6 +1,6 @@
 import { render } from "@youwol/flux-view";
 import { BehaviorSubject, from, of } from "rxjs"
-import { AssetCardView, AssetsListView } from "../.."
+import { AssetSnippetView, AssetsListView } from "../.."
 
 
 beforeEach(() => {
@@ -28,7 +28,7 @@ test('assets-list with one asset', (done) => {
     let state = {
         selectedAsset$: new BehaviorSubject("test-asset-other"),
         selectAsset: () => {
-            let selected = document.querySelector(`.${AssetCardView.ClassSelector} .selected`)
+            let selected = document.querySelector(`.${AssetSnippetView.ClassSelector} .selected`)
             expect(selected).toBeTruthy()
         }
     }

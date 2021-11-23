@@ -21,10 +21,10 @@ let assetFaClasses: Record<AssetType, string> = {
  * 
  * Card view of an asset.
  */
-export class AssetCardView implements VirtualDOM {
+export class AssetSnippetView implements VirtualDOM {
 
     static ClassSelector = "asset-card-view"
-    public readonly baseClasses = `${AssetCardView.ClassSelector} fv-bg-background d-flex overflow-hidden flex-column text-center rounded fv-pointer fv-color-primary fv-hover-color-focus position-relative my-2`
+    public readonly baseClasses = `${AssetSnippetView.ClassSelector} fv-bg-background d-flex overflow-hidden flex-column text-center rounded fv-pointer fv-color-primary fv-hover-color-focus position-relative my-2`
     public readonly class: any
     public readonly style = { width: '250px', height: '250px' }
 

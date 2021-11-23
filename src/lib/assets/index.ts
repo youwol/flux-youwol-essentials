@@ -5,6 +5,8 @@
  * 
  * @module lib/assets
  */
-export { AssetCardView } from "./asset-card.view";
+export { AssetSnippetView } from "./asset-snippet.view";
 export { AssetsListView } from "./assets-list.view";
 export { popupAssetModalView } from "./asset-modal.view";
+export { FluxProjectActionsView } from "./asset-card/asset-specific/flux";
+export { ButtonView as ButtonPermissionView, ImagesCarouselView } from "./utils.view"
