@@ -15,11 +15,23 @@ export interface GroupsResponse {
     groups: Array<GroupResponse>
 }
 
+export interface DefaultDriveResponse {
+
+    driveId: string
+    name: string
+    downloadFolderId: string
+    downloadFolderName: string
+    homeFolderId: string
+    homeFolderName: string
+    groupId: string
+}
+
 export interface DriveResponse {
 
     driveId: string
     name: string
 }
+
 
 export interface DrivesResponse {
 
@@ -188,6 +200,16 @@ export class AssetsGatewayClient {
         ) as Observable<DrivesResponse>
     }
 
+
+    getDefaultUserDrive(): Observable<DefaultDriveResponse> {
+
+        let request = new Request(
+            `${this.basePath}/tree/default-drive`,
+            { method: 'GET', headers: this.getHeaders() }
+        );
+
+        return createObservableFromFetch(request) as Observable<DefaultDriveResponse>
+    }
 
     getDrive(
         groupName: string,
