@@ -101,9 +101,10 @@ export class YouwolBannerView implements VirtualDOM {
 
     static ClassSelector = "youwol-banner-view"
 
-    public readonly class = `d-flex w-100 position-relative fv-text-primary justify-content-between align-self-center  px-3  border-bottom ${YouwolBannerView.ClassSelector}`
+    public readonly class = `w-100 position-relative fv-text-primary justify-content-between align-self-center  px-3  border-bottom ${YouwolBannerView.ClassSelector}`
     public readonly style = {
-        minHeight: '50px'
+        minHeight: '50px',
+        display: 'd-flex'
     }
     public readonly children: Array<VirtualDOM>
 
@@ -130,7 +131,19 @@ export class YouwolBannerView implements VirtualDOM {
         signedIn$: Observable<boolean>
     }) {
         Object.assign(this, params)
-
+        let instanceId = new URLSearchParams(window.location.search).get("instance-id")
+        if (parent.window['@youwol/os'] && instanceId) {
+            parent.window['@youwol/os'].setTopBannerViews(
+                instanceId,
+                {
+                    actionsView: this.customActionsView,
+                    badgesView: this.badgesView
+                }
+            )
+            this.class += " d-none"
+            return
+        }
+        this.class += " d-flex"
         this.children = [
             this.youwolMenuView ? new YouwolMenuView({ badgesView: this.badgesView, youwolMenuView: this.youwolMenuView }) : {},
             this.customActionsView,
