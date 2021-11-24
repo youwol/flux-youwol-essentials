@@ -88,6 +88,18 @@ export interface Asset {
     readonly permissions: Permissions
 }
 
+export interface UpdateAssetBody {
+    name: string
+    tags: string[]
+    description: string
+}
+
+export interface AccessPolicyBody {
+    read: 'forbidden' | 'authorized' | 'expiration-date' | 'owning'
+    share: 'forbidden' | 'authorized'
+    parameters?: { [key: string]: any }
+}
+
 export const UploadStep = {
     START: 'start',
     SENDING: 'sending',
@@ -513,5 +525,219 @@ export class AssetsGatewayClient {
 
         let request = new Request(url, { method: 'POST', body: JSON.stringify(body), headers: this.headers })
         return createObservableFromFetch(request)
+    }
+
+    permissions$(
+        treeId: string,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>) {
+
+        let url = `/api/assets-gateway/tree/${treeId}/permissions`
+        let request = new Request(url, { headers: this.headers })
+        let follower = new Interfaces.RequestFollower({
+            targetId: treeId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.QUERY
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
+    }
+
+    accessInfo$(
+        assetId: string,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
+    ) {
+
+        let url = `/api/assets-gateway/assets/${assetId}/access`
+        let request = new Request(url, { headers: this.headers })
+        let follower = new Interfaces.RequestFollower({
+            targetId: assetId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.QUERY
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
+    }
+
+    updateAccess$(
+        assetId: string,
+        groupId: string,
+        body: AccessPolicyBody,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>) {
+
+        let url = `/api/assets-gateway/assets/${assetId}/access/${groupId}`
+        let request = new Request(url, { method: 'PUT', body: JSON.stringify(body), headers: this.headers })
+        let follower = new Interfaces.RequestFollower({
+            targetId: assetId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.UPLOAD
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
+    }
+
+
+    updateFluxProjectMetadata$(
+        rawId: string,
+        body,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>) {
+
+        let request = new Request(`/api/assets-gateway/raw/flux-project/${rawId}/metadata`,
+            { method: 'POST', body: JSON.stringify(body), headers: this.headers })
+
+        let follower = new Interfaces.RequestFollower({
+            targetId: rawId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.UPLOAD
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
+    }
+
+    getPackageMetadata$(
+        rawId: string,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
+    ) {
+
+        let request = new Request(`/api/assets-gateway/raw/package/metadata/${rawId}`, { headers: this.headers })
+        let follower = new Interfaces.RequestFollower({
+            targetId: rawId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.QUERY
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
+    }
+
+    getFluxProject$(
+        rawId: string,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
+    ) {
+        let request = new Request(`/api/assets-gateway/raw/flux-project/${rawId}`, { headers: this.headers })
+        let follower = new Interfaces.RequestFollower({
+            targetId: rawId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.QUERY
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
+    }
+
+
+    updateAsset$(
+        assetId: string,
+        attributes: UpdateAssetBody,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>): Observable<Asset> {
+
+        let body = Object.assign(attributes)
+        let url = `/api/assets-gateway/assets/${assetId}`
+        let request = new Request(url, { method: 'POST', body: JSON.stringify(body), headers: this.headers })
+        let follower = new Interfaces.RequestFollower({
+            targetId: assetId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.UPLOAD
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
+    }
+
+    addPicture$(
+        assetId: string,
+        picture: { id: string, file: File },
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
+    ) {
+
+        var formData = new FormData();
+        formData.append('file', picture.file, picture.id)
+        let url = `/api/assets-gateway/assets/${assetId}/images/${picture.id}`
+        let request = new Request(url, { method: 'POST', body: formData, headers: this.headers })
+
+        let follower = new Interfaces.RequestFollower({
+            targetId: assetId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.UPLOAD
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
+    }
+
+    removePicture$(
+        assetId: string,
+        pictureId: string,
+        events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
+    ) {
+
+        let url = `/api/assets-gateway/assets/${assetId}/images/${pictureId}`
+        let request = new Request(url, { method: 'DELETE', headers: this.headers })
+
+        let follower = new Interfaces.RequestFollower({
+            targetId: assetId,
+            channels$: events$ ? events$ : [],
+            method: Interfaces.Method.DELETE
+        })
+        return of({}).pipe(
+            tap(() => {
+                follower.start(1)
+            }),
+            mergeMap(() => createObservableFromFetch(request)),
+            tap(() => {
+                follower.end()
+            })
+        ) as any
     }
 }
