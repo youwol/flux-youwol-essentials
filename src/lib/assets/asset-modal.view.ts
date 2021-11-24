@@ -1,6 +1,6 @@
 import { HTMLElement$, render, VirtualDOM } from "@youwol/flux-view"
 import { Modal } from "@youwol/fv-group"
-import { merge, Observable } from "rxjs"
+import { merge, Observable, ReplaySubject } from "rxjs"
 import { take } from "rxjs/operators"
 import { Asset } from "../assets-gateway-client"
 import { AssetCardView } from "./asset-card/asset-card.view"
@@ -14,13 +14,16 @@ import { AssetCardView } from "./asset-card/asset-card.view"
  */
 export function popupAssetModalView(parameters: {
     asset$: Observable<Asset>,
-    actionsFactory: (asset: Asset) => VirtualDOM
+    actionsFactory: (asset: Asset) => VirtualDOM,
+    withTabs?: { [key: string]: VirtualDOM },
+    forceReadonly?: boolean
 }) {
-    let { asset$ } = parameters
     let modalState = new Modal.State()
+    let assetOutput$ = new ReplaySubject<Asset>(1)
+
     let view = new Modal.View({
         state: modalState,
-        contentView: () => new AssetCardView({ asset$, actionsFactory: parameters.actionsFactory }),
+        contentView: () => new AssetCardView({ ...parameters, assetOutput$ }),
         connectedCallback: (elem: HTMLDivElement & HTMLElement$) => {
             elem.children[0].classList.add("w-100")
             // https://stackoverflow.com/questions/63719149/merge-deprecation-warning-confusion
@@ -33,5 +36,5 @@ export function popupAssetModalView(parameters: {
     } as any)
     let modalDiv = render(view)
     document.querySelector("body").appendChild(modalDiv)
-    return view
+    return assetOutput$
 }

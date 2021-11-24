@@ -1,8 +1,9 @@
 import { attr$, child$, children$, HTMLElement$, VirtualDOM } from "@youwol/flux-view";
 import { BehaviorSubject, Observable, of } from "rxjs";
-import { TextEditableView } from "../misc.view";
+import { IconButtonView, TextEditableView } from "../misc.view";
 import { skip } from "rxjs/operators";
 import { Asset } from "../../..";
+
 
 export class AssetTagsView implements VirtualDOM {
 
@@ -12,8 +13,12 @@ export class AssetTagsView implements VirtualDOM {
     public readonly asset: Asset
     public readonly children: VirtualDOM[]
     public readonly tags$: BehaviorSubject<string[]>
-
-    constructor(params: { tags$: BehaviorSubject<string[]>, asset: Asset }) {
+    public readonly forceReadonly: boolean
+    constructor(params: {
+        tags$: BehaviorSubject<string[]>,
+        asset: Asset,
+        forceReadonly?: boolean
+    }) {
 
         Object.assign(this, params)
         this.children = [
@@ -23,10 +28,10 @@ export class AssetTagsView implements VirtualDOM {
                         style: {
                             fontStyle: 'italic'
                         },
-                        innerText: "No tag has been provided yet"
+                        innerText: "No tag has been provided yet."
                     }
                     : {}),
-            this.asset.permissions.write
+            this.asset.permissions.write && !this.forceReadonly
                 ? new TagsEditableView({ tags$: this.tags$ })
                 : AssetTagsView.readOnlyView(this.tags$)
         ]
@@ -37,7 +42,7 @@ export class AssetTagsView implements VirtualDOM {
             class: 'd-flex flex-wrap align-items-center',
             children: children$(
                 tags$,
-                (tag) => AssetTagsView.tagView(of(tag))
+                (tags) => tags.map(tag => AssetTagsView.tagView(of(tag)))
             )
         }
     }
@@ -64,20 +69,17 @@ class TagsEditableView implements VirtualDOM {
         Object.assign(this, params)
 
         this.children = [
+            new IconButtonView({
+                onclick: () => this.tags$.next([...this.tags$.getValue(), 'new tag']),
+                icon: "fa-plus-circle",
+                withClasses: 'p-1'
+            }),
             {
                 class: 'd-flex flex-align-center  flex-wrap',
                 children: children$(
                     this.tags$,
                     (tags) => tags.map((tag, i) => new EditableTagView({ tags$: this.tags$, index: i }))
                 )
-            },
-            {
-                tag: 'button',
-                class: 'fas fv-btn-primary fa-plus border rounded p-1',
-                onclick: () => {
-                    let tags = this.tags$.getValue()
-                    this.tags$.next([...tags, 'new tag'])
-                }
             }
         ]
     }
@@ -108,11 +110,12 @@ class EditableTagView implements VirtualDOM {
                         new TextEditableView({
                             text$,
                             regularView: (text$) => ({ innerText: attr$(text$, t => t) }),
-                            class: 'border rounded p-2 mx-1 d-flex flex-align-center'
+                            class: 'border rounded p-2 d-flex flex-align-center'
                         } as any),
                         {
-                            tag: 'button',
-                            class: 'fas fv-btn-primary fa-trash border rounded p-1',
+                            tag: 'i',
+                            style: { height: 'fit-content' },
+                            class: 'fas fa-times mx-1 fv-text-error fv-pointer fv-hover-xx-lighter',
                             onclick: () => {
                                 let newTags = this.tags$.getValue().filter((_, i) => i != this.index);
                                 this.tags$.next(newTags)

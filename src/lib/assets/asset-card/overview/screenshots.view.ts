@@ -1,8 +1,7 @@
-import { attr$, child$, VirtualDOM } from "@youwol/flux-view";
-import { BehaviorSubject } from "rxjs";
+import { child$, VirtualDOM } from "@youwol/flux-view";
+import { BehaviorSubject, ReplaySubject } from "rxjs";
 import { Asset } from "../../..";
-import { TextEditableView } from "../misc.view";
-
+import { AssetsGatewayClient } from "../../../assets-gateway-client";
 
 
 export class ImagesCarouselView implements VirtualDOM {
@@ -14,17 +13,33 @@ export class ImagesCarouselView implements VirtualDOM {
     public readonly children: VirtualDOM[]
     public readonly selectedSnippet$ = new BehaviorSubject(0)
     public readonly imagesURL: string[]
+    public readonly imageView: (url) => VirtualDOM
 
     constructor(parameters: {
         imagesURL: string[],
         legend?: string,
         onDelete?: (index: number) => void,
-        class,
-        style
+        imageView: (url) => VirtualDOM,
+        class?,
+        style?
     }) {
 
         Object.assign(this, parameters)
         this.class = `${ImagesCarouselView.ClassSelector} ${this.class}`
+        let legendView = {
+            style: {
+                fontStyle: 'italic'
+            },
+            class: 'mt-2',
+            innerText: parameters.legend || ""
+        }
+
+        if (this.imagesURL.length == 0) {
+            this.children = [
+                legendView
+            ]
+            return
+        }
         this.children = [
             {
                 class: "d-flex align-items-center w-100 h-100",
@@ -36,23 +51,15 @@ export class ImagesCarouselView implements VirtualDOM {
                     child$(
                         this.selectedSnippet$,
                         (index) => ({
-                            class: 'd-flex w-100 h-100 position-relative',
+                            class: 'd-flex position-relative',
                             children: [
-                                {
-                                    class: "px-2 w-100 h-100",
-                                    tag: 'img',
-                                    style: {
-                                        height: 'auto'
-                                    },
-                                    src: this.imagesURL[index],
-
-                                },
+                                this.imageView(this.imagesURL[index]),
                                 parameters.onDelete
                                     ? {
                                         style: {
                                             left: '100%'
                                         },
-                                        class: 'fas fa-trash fv-text-error position-absolute fv-pointer',
+                                        class: 'fas fa-times fv-hover-xx-lighter fv-text-error position-absolute fv-pointer',
                                         onclick: () => parameters.onDelete(index)
                                     }
                                     : {}
@@ -65,13 +72,7 @@ export class ImagesCarouselView implements VirtualDOM {
                     ),
                 ]
             },
-            {
-                style: {
-                    fontStyle: 'italic'
-                },
-                class: 'mt-2',
-                innerText: parameters.legend || ""
-            }
+            legendView
         ]
     }
 
@@ -98,39 +99,70 @@ export class AssetScreenShotsView implements VirtualDOM {
     public readonly asset: Asset
     public readonly children: VirtualDOM[]
     public readonly images$: BehaviorSubject<string[]>
+    public readonly forceReadonly: boolean
 
-    constructor(params: { images$: BehaviorSubject<string[]>, asset: Asset }) {
+    public readonly fileUploaded$ = new ReplaySubject<{ file: File, src: string }>(1)
+    public readonly fileRemoved$ = new ReplaySubject<{ imageId: string }>(1)
 
-        window.addEventListener("paste", (pasteEvent) => {
-            this.addImageFromClipboard(pasteEvent)
-        }, false);
+    disconnectedCallback: () => void
 
+    constructor(params: {
+        images$: BehaviorSubject<string[]>,
+        asset: Asset,
+        forceReadonly?: boolean
+    }) {
 
         Object.assign(this, params)
+        let pasteCb = (pasteEvent) => {
+            this.addImageFromClipboard(pasteEvent)
+        }
+
+        if (this.asset.permissions.write && !this.forceReadonly)
+            window.addEventListener("paste", pasteCb, false);
+
+        this.disconnectedCallback = () => {
+            window.removeEventListener("paste", pasteCb, false)
+        }
+        let editable = this.asset.permissions.write && !this.forceReadonly
+
+        let imageView = (url) => {
+            return {
+                class: "px-2",
+                tag: 'img',
+                style: {
+                    height: '25vh',
+                    width: '25vw'
+                },
+                src: url,
+            }
+        }
 
         this.children = [
             child$(
                 this.images$,
-                (images) => images.length > 0 ?
-                    new ImagesCarouselView({
-                        imagesURL: images,
-                        class: 'd-flex flex-column align-items-center mx-auto',
-                        style: {
-                            height: '25vh',
-                            width: '25vw'
-                        },
-                        legend: 'Paste from clipboard to add an image',
-                        onDelete: (index) => {
+                (images) => images.length == 0 ? {
+                    style: {
+                        fontStyle: 'italic'
+                    },
+                    innerText: 'No screenshot has been provided yet.'
+                } : {}
+            ),
+            child$(
+                this.images$,
+                (images) => new ImagesCarouselView({
+                    imagesURL: images,
+                    class: 'd-flex flex-column align-items-center mx-auto',
+                    imageView,
+                    legend: editable ? 'Paste from clipboard to add images' : "",
+                    onDelete: this.asset.permissions.write && !this.forceReadonly
+                        ? (index) => {
+                            let imageId = this.images$.getValue()[index].split('/').slice(-1)[0]
+                            this.fileRemoved$.next({ imageId })
                             let images = this.images$.getValue().filter((_, i) => i != index)
                             this.images$.next(images)
                         }
-                    })
-                    : {
-                        style: {
-                            fontStyle: 'italic'
-                        },
-                        innerText: "No screenshot has been provided: paste from clipboard to add an image."
-                    }
+                        : undefined
+                })
             )
         ]
     }
@@ -139,9 +171,9 @@ export class AssetScreenShotsView implements VirtualDOM {
 
         let files = pasteEvent.clipboardData.files;
         if (files.length == 1 && files[0].type.indexOf("image") === 0) {
-            var file = files[0];
-            //let picture = this.newImage(URL.createObjectURL(file), file)
+            var file = files[0]
             let url = URL.createObjectURL(file)
+            this.fileUploaded$.next({ file, src: url })
             this.images$.next([...this.images$.getValue(), url])
         }
     }

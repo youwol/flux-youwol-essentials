@@ -1,7 +1,58 @@
 import { attr$, child$, VirtualDOM } from "@youwol/flux-view"
+import { Button } from "@youwol/fv-button"
 import { BehaviorSubject } from "rxjs"
 
+export class IconButtonView {
 
+    static ClassSelector = "icon-button-view"
+    public readonly baseClass = `${IconButtonView.ClassSelector} fas fv-pointer fv-text-primary fv-bg-secondary fv-hover-x-lighter border rounded p-1`
+    public readonly class: string
+    public readonly onclick: (ev: MouseEvent) => void
+    public readonly style: { [key: string]: string }
+    public readonly icon: string
+
+    constructor(params: {
+        onclick: (ev: MouseEvent) => any,
+        icon: string,
+        withClasses?: string,
+        style?: { [key: string]: string }
+    }) {
+        Object.assign(this, params)
+        this.class = `${this.baseClass} ${this.icon} ${params.withClasses || ""}`
+    }
+}
+
+
+export class ButtonView extends Button.View {
+
+    class = 'fv-btn fv-bg-secondary fv-hover-x-lighter'
+
+    constructor({ name, icon, withClass, enabled }: { name: string, icon: string, withClass: string, enabled: boolean }) {
+        super({
+            state: new Button.State(),
+            contentView: () => ({
+                class: 'd-flex align-items-center',
+                children: [
+                    { class: icon },
+                    {
+                        class: 'ml-1',
+                        innerText: name
+                    }
+                ]
+            }),
+            disabled: !enabled
+        } as any)
+        this.class = `${this.class} ${withClass}`
+    }
+}
+
+export function sectionTitleView(title: string): VirtualDOM {
+    return {
+        tag: 'h3',
+        class: 'border-bottom w-100 mt-5',
+        innerText: title
+    }
+}
 
 export class TextEditableView implements VirtualDOM {
 
@@ -35,11 +86,12 @@ export class TextEditableView implements VirtualDOM {
                 this.editionMode$,
                 (isEditing) => isEditing
                     ? {}
-                    : {
-                        tag: 'button',
-                        class: 'fas fv-btn-primary fa-pen border rounded p-1 mx-2',
-                        onclick: () => this.editionMode$.next(true)
+                    : new IconButtonView({
+                        onclick: () => this.editionMode$.next(true),
+                        icon: 'fa-edit',
+                        withClasses: "mx-2"
                     })
+            )
         ]
     }
 

@@ -12,12 +12,18 @@ export class AssetTitleView implements VirtualDOM {
     public readonly children: VirtualDOM[]
     public readonly name$: BehaviorSubject<string>
 
-    constructor(params: { name$: BehaviorSubject<string>, asset: Asset }) {
+    public readonly forceReadonly: boolean
+
+    constructor(params: {
+        name$: BehaviorSubject<string>,
+        asset: Asset,
+        forceReadonly?: boolean
+    }) {
 
         Object.assign(this, params)
 
         this.children = [
-            this.asset.permissions.write
+            this.asset.permissions.write && this.forceReadonly == false
                 ? new TextEditableView({ text$: this.name$, regularView: AssetTitleView.readOnlyView })
                 : AssetTitleView.readOnlyView(this.name$)
         ]

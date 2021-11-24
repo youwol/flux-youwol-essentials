@@ -1,5 +1,5 @@
 import { child$, VirtualDOM } from "@youwol/flux-view"
-import { combineLatest, Observable } from "rxjs"
+import { combineLatest, Observable, Subject } from "rxjs"
 import { uuidv4 } from "@youwol/flux-core"
 
 import { Tabs } from '@youwol/fv-tabs'
@@ -14,12 +14,13 @@ type AssetPreviewApp = {
     applicationURL: (Asset) => string
 }
 
-class TabPreview extends Tabs.TabData {
-    public readonly preview: AssetPreviewApp
+class AssetTab extends Tabs.TabData {
 
-    constructor(preview: AssetPreviewApp) {
-        super(preview.name, preview.name)
-        this.preview = preview
+    public readonly view: VirtualDOM
+
+    constructor(name: string, view: VirtualDOM) {
+        super(name, name)
+        this.view = view
     }
 }
 
@@ -33,12 +34,21 @@ export class AssetCardView implements VirtualDOM {
     public readonly asset$: Observable<Asset>
     public readonly actionsFactory: (asset: Asset) => VirtualDOM
 
+    public readonly withTabs: { [key: string]: VirtualDOM } = {}
+    public readonly forceReadonly: boolean = false
+
+    public readonly assetOutput$: Subject<Asset>
+
     constructor(params: {
         asset$: Observable<Asset>,
-        actionsFactory: (asset: Asset) => VirtualDOM
+        actionsFactory: (asset: Asset) => VirtualDOM,
+        assetOutput$: Subject<Asset>,
+        withTabs?: { [key: string]: VirtualDOM },
+        forceReadonly?: boolean
     }) {
 
         Object.assign(this, params)
+
         this.children = [
             child$(
                 combineLatest([this.asset$, getSettings$()]),
@@ -53,35 +63,42 @@ export class AssetCardView implements VirtualDOM {
         ]
     }
 
-    presentationView(parameters: { asset: Asset, defaultApplications: AssetPreviewApp[] }): VirtualDOM {
-        let { asset, defaultApplications } = parameters
+    presentationView(parameters: {
+        asset: Asset,
+        defaultApplications: AssetPreviewApp[]
+    }): VirtualDOM {
 
-        let mainView = new AssetOverview({ asset, actionsFactory: this.actionsFactory })
+        let { asset } = parameters
 
-        let previews = defaultApplications
-            .filter((preview) => preview.canOpen(asset))
-            .map((preview) => new TabPreview(preview))
+        let mainView = new AssetOverview({
+            asset,
+            actionsFactory: this.actionsFactory,
+            assetOutput$: this.assetOutput$,
+            forceReadonly: this.forceReadonly,
+            class: 'overflow-auto p-3',
+            style: {
+                maxHeight: '75vh',
+            }
+        } as any)
 
-        if (previews.length == 0 || !asset.permissions.read)
+        if (Object.keys(this.withTabs).length == 0)
             return mainView
+
+        let previews = Object.entries(this.withTabs)
+            .map(([name, view]) => new AssetTab(name, view))
 
         let overViewUid = uuidv4()
         let state = new Tabs.State([new Tabs.TabData(overViewUid, "Overview"), ...previews])
         let view = new Tabs.View({
             state,
-            contentView: (_, tabData: TabPreview) => tabData.id == overViewUid
+            contentView: (_, tabData: AssetTab) => tabData.id == overViewUid
                 ? mainView
-                : {
-                    tag: 'iframe',
-                    width: '100%',
-                    style: { aspectRatio: '2' },
-                    src: tabData.preview.applicationURL(asset)
-                },
+                : tabData.view,
             headerView: (_, tabData) => ({
                 class: `px-2 rounded border ${(tabData.id == overViewUid) ? 'overview' : 'default-app'}`,
                 innerText: tabData.name
             })
-        })
+        } as any)
         return view
     }
 }

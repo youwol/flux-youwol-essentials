@@ -1,7 +1,9 @@
-import { attr$, child$, VirtualDOM } from "@youwol/flux-view";
-import { BehaviorSubject } from "rxjs";
-import { TextEditableView } from "../misc.view";
-import { skip } from "rxjs/operators";
+import { attr$, child$, HTMLElement$, VirtualDOM } from "@youwol/flux-view";
+import { BehaviorSubject, from, merge, Observable } from "rxjs";
+
+import { IconButtonView } from "../misc.view";
+import { filter, mapTo, mergeMap } from "rxjs/operators";
+import { install } from "@youwol/cdn-client";
 import { Asset } from "../../..";
 
 export class AssetDescriptionView implements VirtualDOM {
@@ -12,8 +14,13 @@ export class AssetDescriptionView implements VirtualDOM {
     public readonly asset: Asset
     public readonly children: VirtualDOM[]
     public readonly description$: BehaviorSubject<string>
+    public readonly forceReadonly: boolean
 
-    constructor(params: { description$: BehaviorSubject<string>, asset: Asset }) {
+    constructor(params: {
+        description$: BehaviorSubject<string>,
+        asset: Asset,
+        forceReadonly?: boolean
+    }) {
 
         Object.assign(this, params)
         this.children = [
@@ -23,10 +30,10 @@ export class AssetDescriptionView implements VirtualDOM {
                         style: {
                             fontStyle: 'italic'
                         },
-                        innerText: "No description has been provided yet (shift+enter for new-line)"
+                        innerText: "No description has been provided yet."
                     }
                     : {}),
-            this.asset.permissions.write
+            this.asset.permissions.write && !this.forceReadonly
                 ? new DescriptionEditableView({ description$: this.description$ })
                 : AssetDescriptionView.readOnlyView(this.description$)
         ]
@@ -34,37 +41,87 @@ export class AssetDescriptionView implements VirtualDOM {
 
     static readOnlyView(description$: BehaviorSubject<string>) {
         return {
-            tag: 'pre',
+            tag: 'div',
             class: 'fv-text-primary',
-            innerText: attr$(description$, d => d)
+            innerHTML: attr$(description$, d => d)
         }
     }
+}
+
+function fetchCodeMirror$(): Observable<any> {
+
+    return from(
+        install({
+            modules: ['codemirror'],
+            scripts: [
+                "codemirror#5.52.0~mode/htmlmixed.min.js",
+                "codemirror#5.52.0~mode/xml.min.js"
+            ],
+            css: [
+                "codemirror#5.52.0~codemirror.min.css",
+                "codemirror#5.52.0~theme/blackboard.min.css"
+            ]
+        })
+    )
 }
 
 class DescriptionEditableView implements VirtualDOM {
 
     static ClassSelector = "description-editable-view"
-    public readonly class = `${DescriptionEditableView.ClassSelector} d-flex justify-content-center align-items-center`
+    public readonly class = `${DescriptionEditableView.ClassSelector} `
     public readonly children: VirtualDOM[]
     public readonly editionMode$ = new BehaviorSubject(false)
 
     public readonly description$: BehaviorSubject<string>
+
+    public readonly configurationCodeMirror = {
+        value: "",
+        mode: 'htmlmixed',
+        lineNumbers: false,
+        theme: 'blackboard',
+        lineWrapping: true,
+        indentUnit: 4
+    }
+    editor: any
 
     constructor(params: { description$: BehaviorSubject<string> }) {
 
         Object.assign(this, params)
 
         this.children = [
-            new TextEditableView({
-                text$: this.description$,
-                regularView: (description$) => AssetDescriptionView.readOnlyView(description$),
-                templateEditionView: {
-                    tag: 'textarea',
-                    class: 'w-100',
-                    style: { width: '25%' }
-                },
-                class: 'w-100'
-            } as any)
+            child$(
+                this.editionMode$.pipe(
+                    mergeMap((editionMode) => fetchCodeMirror$().pipe(mapTo(editionMode)))
+                ),
+                (editionMode) => {
+                    return editionMode ? {
+                        class: 'h-100 w-100',
+                        connectedCallback: (elem: HTMLDivElement & HTMLElement$) => {
+                            let config = {
+                                ...this.configurationCodeMirror,
+                                value: this.description$.getValue()
+                            }
+                            this.editor = window['CodeMirror'](elem, config)
+                        }
+                    } : AssetDescriptionView.readOnlyView(this.description$)
+                }
+            ),
+            child$(
+                this.editionMode$,
+                (edition) => edition
+                    ? new IconButtonView({
+                        onclick: () => {
+                            this.editionMode$.next(false)
+                            this.description$.next(this.editor.getValue())
+                        },
+                        icon: 'fa-check'
+                    })
+                    : new IconButtonView({
+                        onclick: () => this.editionMode$.next(true),
+                        icon: 'fa-edit'
+                    })
+            ),
         ]
     }
 }
+
