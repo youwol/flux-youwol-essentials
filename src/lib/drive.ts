@@ -1,12 +1,12 @@
 import { Interfaces } from "@youwol/flux-files"
 import { Observable, Subject } from "rxjs"
 import { map, tap } from "rxjs/operators"
-import { DeletedEntityResponse, ItemResponse, AssetsGatewayClient } from "./assets-gateway-client"
+import { DeletedEntityResponse, ItemResponse, AssetsGatewayClient } from "@youwol/platform-essentials"
 
 
 export class File extends Interfaces.File {
 
-    constructor(public readonly drive: Drive, public readonly metadata: ItemResponse){
+    constructor(public readonly drive: Drive, public readonly metadata: ItemResponse) {
         super(metadata.treeId, metadata.name, metadata.folderId, drive, "")
     }
 }
@@ -17,7 +17,7 @@ export class Drive extends Interfaces.Drive {
 
     constructor(
         id: string,
-        name: string, 
+        name: string,
         assetsGtwClient: AssetsGatewayClient,
         useCache?: boolean
     ) {
@@ -32,7 +32,7 @@ export class Drive extends Interfaces.Drive {
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<Interfaces.File> {
 
-        return this.assetsGtwClient.postFile( folderId, name, content, events$ || this.events$).pipe(
+        return this.assetsGtwClient.postFile(folderId, name, content, events$ || this.events$).pipe(
             map(resp => new Interfaces.File(resp.itemId, resp.name, folderId, this, ""))
         )
     }
@@ -51,7 +51,7 @@ export class Drive extends Interfaces.Drive {
     deleteFolder(
         folderId: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
-        ): Observable<DeletedEntityResponse> {
+    ): Observable<DeletedEntityResponse> {
 
         return this.assetsGtwClient.deleteFolder(folderId, events$ || this.events$)
     }
@@ -112,7 +112,7 @@ export class Drive extends Interfaces.Drive {
             tap(({ items, folders }) => items.forEach(item => this.rawIds[item.treeId] = item.rawId)),
             map(({ items, folders }) => {
                 return {
-                    files: items.map(item => new File(this, item) ),
+                    files: items.map(item => new File(this, item)),
                     folders: folders.map(item => new Interfaces.Folder(item.folderId, item.name, item.parentFolderId, this)),
                     endIterator: undefined
                 }
@@ -124,7 +124,7 @@ export class Drive extends Interfaces.Drive {
         fileId: string,
         events$?: Subject<Interfaces.Event> | Array<Subject<Interfaces.Event>>
     ): Observable<DeletedEntityResponse> {
-        
+
         return this.assetsGtwClient.deleteItem(this.id, fileId, events$ || this.events$)
     }
 

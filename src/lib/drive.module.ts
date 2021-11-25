@@ -1,6 +1,6 @@
 
 import { Flux, BuilderView, ModuleFlux, Pipe, Schema, Property, Context, ModuleError } from "@youwol/flux-core"
-import { AssetsGatewayClient } from "./assets-gateway-client";
+import { AssetsGatewayClient } from "@youwol/platform-essentials";
 import { Drive } from "./drive";
 import { pack } from './main';
 
@@ -28,19 +28,19 @@ export namespace ModuleYouwolDrive {
     })
     export class PersistentData {
 
-         /**
-         * Name of the group containing the YouWol drive (as displayed in the workspace explorer).
-         */
-          @Property({ 
+        /**
+        * Name of the group containing the YouWol drive (as displayed in the workspace explorer).
+        */
+        @Property({
             description: "Name of the group containing the YouWol drive"
         })
         readonly ywGroup: string
 
 
-         /**
-         * Name of the drive (as displayed in the workspace explorer).
-         */
-          @Property({ 
+        /**
+        * Name of the drive (as displayed in the workspace explorer).
+        */
+        @Property({
             description: "Name of the drive (as displayed in the workspace explorer)"
         })
         readonly ywDrive: string
@@ -49,24 +49,25 @@ export namespace ModuleYouwolDrive {
         /**
          * The displayed name of the drive.
          */
-         @Property({ 
+        @Property({
             description: "displayed name of the drive."
         })
         readonly driveName: string
 
 
         constructor({ ywGroup, ywDrive, driveName }:
-            {   ywGroup?: string,
+            {
+                ywGroup?: string,
                 ywDrive?: string,
-                driveName? : string
+                driveName?: string
             } = {}) {
-                this.ywGroup =  ywGroup != undefined ? ywGroup : "youwol-users"
-                this.ywDrive =  ywDrive != undefined ? ywDrive : "assets"
-                this.driveName = driveName != undefined ? driveName : 'YouWol drive'
+            this.ywGroup = ywGroup != undefined ? ywGroup : "youwol-users"
+            this.ywDrive = ywDrive != undefined ? ywDrive : "assets"
+            this.driveName = driveName != undefined ? driveName : 'YouWol drive'
         }
     }
 
-    
+
     /**
      *  ## Abstract
      * 
@@ -106,52 +107,52 @@ export namespace ModuleYouwolDrive {
         icon: svgIcon
     })
     export class Module extends ModuleFlux {
-        
+
         /**
          * Output pipe of the module: convey a YouWol's drive
          */
-        public readonly drive$ : Pipe<Drive>
+        public readonly drive$: Pipe<Drive>
 
 
         constructor(params) {
             super(params)
 
-            let context = new Context('contructor', {}, this.logChannels )
+            let context = new Context('contructor', {}, this.logChannels)
 
             this.addJournal({
                 title: `Reporting @module construction`,
                 entryPoint: context
             })
 
-            this.drive$ = this.addOutput({id:"drive"} )
+            this.drive$ = this.addOutput({ id: "drive" })
             let configuration = this.getPersistentData<PersistentData>()
             let groupName = configuration.ywGroup
-            if(groupName[0] != '/' )
+            if (groupName[0] != '/')
                 groupName = '/' + groupName
 
             let driveName = configuration.ywDrive
             context.info(
                 `YouWol's group: ${groupName}; drive name: ${driveName}`,
-                {configuration}
+                { configuration }
             )
             let assetsGtwClient = new AssetsGatewayClient()
             assetsGtwClient.getDrive(groupName, driveName)
-            .subscribe( 
-                (drive) => {
-                    this.drive$.next({data:new Drive(drive.driveId, drive.name, assetsGtwClient, true ), context})
-                    context.end()
-                },
-                (error) => {
-                    context.error(
-                        new ModuleError(
-                            this, 
-                            "Failed to retrieve the drive at given (group name,drive name), make sure the drive exists in your workspace"
-                        ),
-                        { groupName, driveName }
-                    )
-                    context.end()
-                })
+                .subscribe(
+                    (drive) => {
+                        this.drive$.next({ data: new Drive(drive.driveId, drive.name, assetsGtwClient, true), context })
+                        context.end()
+                    },
+                    (error) => {
+                        context.error(
+                            new ModuleError(
+                                this,
+                                "Failed to retrieve the drive at given (group name,drive name), make sure the drive exists in your workspace"
+                            ),
+                            { groupName, driveName }
+                        )
+                        context.end()
+                    })
         }
     }
-    
+
 }

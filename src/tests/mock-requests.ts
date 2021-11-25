@@ -6,7 +6,7 @@ class MockRequest {
 }
 
 
-export class XHRMock{
+export class XHRMock {
 
     static responseText: string
     static readyState: number
@@ -18,7 +18,7 @@ export class XHRMock{
     status: number
     statusText: string
 
-    method:string
+    method: string
     static url: string
     response: any
 
@@ -27,36 +27,36 @@ export class XHRMock{
     onloadstart: (Event) => void
     onprogress: (Event) => void
     upload = {
-        onprogress : undefined
+        onprogress: undefined
     }
-    open(method, url){
+    open(method, url) {
         this.method = method
-        XHRMock.url=url
+        XHRMock.url = url
     }
-    send(){
-        this.onloadstart({loaded:0,total:5})
-        if(this.method=="GET"){
-            this.onprogress({loaded:1,total:5})
-            this.onprogress({loaded:4,total:5})
-            this.onprogress({loaded:5,total:5}) 
+    send() {
+        this.onloadstart({ loaded: 0, total: 5 })
+        if (this.method == "GET") {
+            this.onprogress({ loaded: 1, total: 5 })
+            this.onprogress({ loaded: 4, total: 5 })
+            this.onprogress({ loaded: 5, total: 5 })
         }
-        if(this.method=="POST"){
-            this.upload.onprogress({loaded:1,total:5})
-            this.upload.onprogress({loaded:4,total:5})
-            this.upload.onprogress({loaded:5,total:5}) 
+        if (this.method == "POST") {
+            this.upload.onprogress({ loaded: 1, total: 5 })
+            this.upload.onprogress({ loaded: 4, total: 5 })
+            this.upload.onprogress({ loaded: 5, total: 5 })
         }
         this.responseText = XHRMock.responseText
         this.status = XHRMock.status
         this.statusText = XHRMock.statusText
         this.readyState = XHRMock.readyState
-        this.response = new Blob( [this.responseText])
-        this.onload({loaded:5,total:5})
+        this.response = new Blob([this.responseText])
+        this.onload({ loaded: 5, total: 5 })
     }
-    setRequestHeader(k,v){
+    setRequestHeader(k, v) {
         XHRMock.headers[k] = v
     }
 }
-  
+
 let requestGroup = {
     url: "/api/assets-gateway/groups",
     option: {
@@ -145,29 +145,29 @@ let requestRenameDrive = {
     },
 }
 let requestDeleteItem = {
-    url: "/api/assets-gateway/tree/test_item",
+    url: "/api/assets-gateway/tree/items/test_item",
     option: {
-      method: "DELETE",
-      headers: {
-      },
+        method: "DELETE",
+        headers: {
+        },
     },
-  }
+}
 let requestGetItem = {
     url: "/api/assets-gateway/tree/items/item_treeId",
     option: {
-      method: "GET",
-      headers: {
-      },
+        method: "GET",
+        headers: {
+        },
     },
-  }
+}
 let requestGetItems = {
     url: "/api/assets-gateway/tree/folders/folder_tree_id/children",
     option: {
-      method: "GET",
-      headers: {
-      },
+        method: "GET",
+        headers: {
+        },
     },
-  }
+}
 
 let mappings = {
     [JSON.stringify(requestGroup)]: () => ({
@@ -246,14 +246,14 @@ let mappings = {
         folderId: "folder"
     }),
     [JSON.stringify(requestGetItems)]: () => ({
-        folders: [   {
+        folders: [{
             folderId: "test_folder",
             parentFolderId: "test_drive",
             name: "test folder",
             driveId: "test_drive",
             created: "whenever"
         }],
-        items:[ {
+        items: [{
             name: 'test item',
             treeId: "item_treeId",
             rawId: "item_rawId",
