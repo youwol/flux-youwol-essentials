@@ -1,7 +1,7 @@
 {
     "name": "@youwol/flux-youwol-essentials",
-    "version": "0.0.5-next",
-    "description": "Essential modules to work with YouWol's assets",
+    "version": "0.0.6",
+    "description": "Essential modules to work with YouWol's assets in Flux",
     "author": "greinisch@youwol.com",
     "keywords": [
         "youwol",
