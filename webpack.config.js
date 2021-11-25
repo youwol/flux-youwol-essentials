@@ -39,7 +39,8 @@ module.exports = {
         "@youwol/fv-button": "@youwol/fv-button",
         "@youwol/fv-tree": "@youwol/fv-tree",
         "@youwol/fv-tabs": "@youwol/fv-tabs",
-        "@youwol/fv-inputs": "@youwol/fv-inputs"
+        "@youwol/fv-inputs": "@youwol/fv-inputs",
+        "@youwol/platform-essentials": "@youwol/platform-essentials"
     }],
     module: {
         rules: [
