@@ -270,7 +270,17 @@ function mockFetch(request: MockRequest) {
     return new Promise((resolveCb) => {
         resolveCb(
             {
-                json: () => mappings[JSON.stringify(request)]()
+                json: () => {
+                    try {
+                        return mappings[JSON.stringify(request)]()
+                    }
+                    catch (e) {
+                        console.log(request)
+                        let stringified = JSON.stringify(request)
+                        console.log(stringified)
+                        console.error("request not found")
+                    }
+                }
             }
         )
     })
